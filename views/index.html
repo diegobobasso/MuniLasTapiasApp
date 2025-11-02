@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Municipalidad de Las Tapias</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <link rel="stylesheet" href="css/style.css">
+
+        <!-- Carga el SDK de EmailJS -->
+        <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    </head>
+
+    <body>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+  
+        
+            <nav class="navbar navbar-expand-xl bgdwhite">
+                <div class="container">
+        
+                    <a class="navbar-brand txtblack" href="#">
+                        <img src="img/LOGO MUNI LAS TAPIAS.jpg" alt="Logo" width="70" height="70" class="d-inline-block align-text-center">
+                        Municipalidad de Las Tapias
+                    </a>
+        
+                  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+                  <div class="collapse navbar-collapse col-8 txtgrey" id="navbarSupportedContent">
+                    
+                    <div class="container col-1">
+
+                    </div>
+                    
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                          <a class="nav-link txtgrey" href="#">Noticias</a>
+                        </li>
+                         <li class="nav-item">
+                          <a class="nav-link txtgrey" href="#">Ordenanzas</a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link txtgreen" href="#sugerencias">Buzón de sugerencias</a>
+                        </li>
+                      </ul>
+                      
+                    </div>
+                </div>
+            </nav>
+        
+
+            <div class="carousel slide bg-dark" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                  <div class="carousel-item active">
+                    <img src="img/portal municipalidad las tapias.jpg" class="img-fluid bgimagen">
+                    <div class="carousel-caption d-block d-md-block text-end tamres">
+                        <h1 class="card-title">LAS TAPIAS</h1>
+                        <p class="card-text">Las Tapias es una localidad situada en el departamento</p>
+                        <p class="card-text">San Javier, provincia de Córdoba, Argentina.</p>
+                        <p class="card-text">Se encuentra situada en el valle de Traslasierra,</p> 
+                        <p class="card-text">sobre la ruta provincial 14, a 11 km de Villa Dolores</p>
+                        <p class="card-text">y a 184 km de la ciudad de Córdoba.</p>
+                    </div>
+                  </div>
+                </div>
+            </div>   
+
+
+            <div class="container-fluid row p-3 m-0">
+                <div class="col-12 col-md-6">
+                        <img src="img/VERANO EN LAS TAPIAS 2.jpg" class="img-fluid d-block mx-auto"/>
+                       
+                </div>
+
+                <div class="col-12 col-md-6 p-0">
+                    
+                    <h5 class="card-title">Turismo</h5>
+                    <p style="font-size: 0.9rem;">La principal actividad económica de la localidad 
+                        es el turismo, encontrándose entre sus principales atractivos turísticos 
+                        el Dique Nivelador Boca del Río y el complejo Ecovalle, (en el cual se encuentra
+                        un pequeños zoológico) además de su paisaje serrano, sus ríos y sus bosques.</p> 
+                        
+                    <p style="font-size: 0.9rem;">Las actividades nocturnas también son importantes 
+                        para la economía local, ya que existen en ésta numerosos bares, confiterías, etc.</p>
+                        
+                </div>
+                   
+                
+            </div>
+        
+            <div class="container-fluid row row-cols-2 m-0">
+                <div class="col-12 col-md-6 p-0">
+                   
+                    <img class="img-fluid d-block mx-auto" src="img/Festival de la cerveza.jpg" />
+                    
+                </div>
+
+                <div class="col-12 col-md-6 p-0">
+                    
+                    <h5 >FESTIVALES</h5>
+                    <p  style="font-size: 0.9rem;">
+                        ¡Llega la Primera Fiesta de la Cerveza Serrana a Las Tapias! ✨🍻
+                        Una noche única para disfrutar de la mejor cerveza artesanal de 
+                        emprendedores regionales, feria de productos, gastronomía y shows en vivo 🎶.</p>
+                    <p style="font-size: 0.9rem;">📍 Lugar: Nabuco</p>
+                    <p style="font-size: 0.9rem;">📅 Fecha: Sábado 04 de octubre</p>
+                    <p style="font-size: 0.9rem;">🕖 Desde las 19hs</p>
+                    <p style="font-size: 0.9rem;">Organiza: Turismo Las Tapias</p>
+                    <p style="font-size: 0.9rem;">Municipalidad de Las Tapias</p>
+                    <p style="font-size: 0.9rem;">¡Vení a vivir esta experiencia serrana con sabor, música y diversión!</p> 
+                    <p><a class="btn btn-md btnblue m-3" href="#">Conocé más</a></p>
+                </div>
+                   
+            </div>
+ <div class="container-fluid row row-cols-2 m-0">
+                <div class="col-12 col-md-6 p-1">
+                   
+                    <video class="img-fluid d-block mx-auto" autoplay loop muted playsinline>
+                        <source src="videos/video rio 3.mp4" type="video/mp4">
+                        Tu navegador no soporta la etiqueta de video.
+                    </video>
+                </div>
+
+                <div class="col-12 col-md-6 p-1">
+                    
+                    <h5>Disfruta de tus vacaciones en Las Tapias</h5>
+                    <p  style="font-size: 0.9rem;"> 
+                        Sumergirse en la naturaleza es volver a lo esencial. Este viaje te
+                         llevará entre ríos y paisajes de sierras imponentes, donde el tiempo 
+                         parece detenerse y el aire se llena de calma. Cada amanecer reflejado 
+                         en el agua y cada sendero entre los árboles te recordará la belleza 
+                         de lo simple. Las risas compartidas, los chapuzones espontáneos y los 
+                         silencios contemplativos serán parte de una experiencia que quedará 
+                         grabada en el alma. Aquí no hay prisa, solo el fluir del río y el 
+                         susurro del viento entre las cumbres. Un rincón del mundo donde el 
+                         cuerpo descansa y el espíritu se renueva. Bienvenidos a Las Tapias.
+                        </p> 
+                    <p><a class="btn btn-md btnblue m-3" href="#">Conocé más</a></p>
+                </div>
+                   
+            </div>
+
+            <div id="sugerencias" class="container-fluid text-center p-3">
+                
+                <h2><b>BUZON DE SUGERENCIAS</b></h2>
+            </div>
+        
+            <div class="container col-7 p-5">
+                <form id="sugerencia-form">
+                    <div class="row">
+                        <p>Deja tu sugerencia para mejorar nuestro municipio y nos pondremos en contacto.</p>
+                        <div class="col-md-6">
+                            <input type="text" name="nombre" class="form-control" placeholder="Tu nombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="email" name="email" class="form-control" placeholder="Tu email" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea name="mensaje" class="form-control" rows="5" placeholder="Tu sugerencia" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <span class="txtchico">Recuerda incluir los datos para tener en cuenta tu sugerencia</span>
+                    <button class="w-100 btn btn-lg btngreen" type="submit">Enviar</button>
+                </form>
+            </div>
+        
+        <footer>
+            <nav class="navbar navbar-expand-lg bgazul rounded" aria-label="Thirteenth navbar example">
+                <div class="container-fluid">
+                  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample11" aria-controls="navbarsExample11" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+          
+                  <div class="collapse navbar-collapse d-lg-flex" id="navbarsExample11">
+                    <ul class="navbar-nav col-lg-12 justify-content-lg-center">
+                        <li class="nav-item">
+                            <a class="nav-link txtwhite" href="#">Preguntas frecuentes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link txtwhite" href="#">Contáctanos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link txtwhite" href="#">Prensa</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link txtwhite" href="#">Conferencias</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link txtwhite" href="#">Términos y condiciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link txtwhite" href="#">Privacidad</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link txtwhite" href="#">Estudiantes</a>
+                        </li>
+                    </ul>
+                  </div>
+                </div>
+            </nav>
+        </footer>
+        
+        <script>
+           
+            document.getElementById('sugerencia-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const form = e.target;
+                const datos = {
+                    nombre: form.nombre.value,
+                    email: form.email.value,
+                    mensaje: form.mensaje.value
+                    };
+                
+                emailjs.init("rt5U45x1G4tHZDe8A");
+
+                // Enviar a tu casilla
+                emailjs.send("service_h2pah0g", "Plantilla_a_mi", datos)
+                .then(() => {
+                // Enviar al usuario
+                    return emailjs.send("service_h2pah0g", "confirmacion", datos);
+                    })
+                .then(() => {
+                    form.reset();
+                    window.location.href = "gracias.html"; // Redirige a la página de agradecimiento
+                    })
+                .catch(error => {
+                    console.error("Error al enviar:", error);
+                    alert("Hubo un error al enviar la sugerencia.");
+                });
+            });
+        </script>
+    </body>
+</html>
+
+

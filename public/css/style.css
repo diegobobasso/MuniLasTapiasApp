@@ -1,0 +1,133 @@
+.txtgreen {
+    color: rgb(12, 190, 12);
+}
+
+.btngreen {
+    color:white;
+    background-color: rgb(135, 201, 36);
+}
+
+.btnred {
+    color:white;
+    background-color: rgb(247, 4, 4);
+    border-radius: 10%;
+    padding-left: 3%;
+    padding-right: 3%;
+}
+
+.btnyellow {
+    color:black;
+    background-color: rgba(255, 217, 0, 0.932);
+    border-radius: 10%;
+    padding-left: 3%;
+    padding-right: 3%;
+}
+
+.btnblue {
+    color:white;
+    background-color: rgb(3, 172, 214);
+    border-radius: 10%;
+    padding-left: 3%;
+    padding-right: 3%;
+}
+
+.btntras {
+    color:white;
+    background-color: rgba(250, 251, 252, 0);
+    border-color: white;
+    font-size: 1rem;
+}
+
+.btncompras {
+    color: white;
+    background-color: rgb(39, 158, 23);
+    font-size: 1rem;
+}
+
+.btngrey {
+    color:white;
+    background-color: rgb(123, 124, 122);
+    border-radius: 10%;
+    padding-left: 3%;
+    padding-right: 3%;
+}
+
+
+.punteado {
+    border-bottom: 2px dotted #9999CC;
+    text-decoration:none;
+}
+
+.centreado {
+    text-align: center;
+}
+
+.txtgrey {
+    color: rgb(168, 161, 161);
+}
+
+.txtwhite {
+    color:white;
+}
+
+.txtblack {
+    COLOR: black;
+}
+
+.bgimagen {
+    background-size: cover;
+    opacity: 0.5;
+}
+
+.bgdgrey {
+    background-color: rgb(100, 103, 105);
+}
+
+a:active {
+    color: white;
+}
+
+.txtchico {
+    font-size: 0.7rem;
+}
+
+header {
+    height: 200px;
+}
+
+.imgba {
+    max-height: 100%;
+}
+
+@media screen and (max-width: 800px) {
+    .tamres{
+    font-size: 70%;
+
+    }
+        
+  }
+
+@media screen and (max-width: 500px) {
+    .tamres{
+    font-size: 50%;
+
+    }
+        
+  }
+
+ 
+.ancho {
+    height: 100%;
+}
+
+.bgceleste {
+    background-color: rgba(6, 200, 248, 0.39);
+}
+
+.bgazul {
+    background-color: rgba(38, 58, 114, 0.993);
+}
+
+.clearfix {
+    overflow: auto;
+  }
