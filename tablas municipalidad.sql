@@ -162,11 +162,17 @@ CREATE TABLE sugerencias (
 );
 
 -- Tabla empleados
-
 CREATE TABLE empleados (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100),
-  email VARCHAR(100) UNIQUE,
-  password_hash VARCHAR(255),
-  rol ENUM('admin', 'empleado') DEFAULT 'empleado'
+  id INT AUTO_INCREMENT PRIMARY KEY,                         -- Identificador único
+  nombre VARCHAR(100) NOT NULL,                              -- Nombre completo del empleado
+  email VARCHAR(100) UNIQUE NOT NULL,                        -- Email institucional (clave de login)
+  dni VARCHAR(20) UNIQUE,                                    -- Documento nacional para trazabilidad
+  username VARCHAR(50) UNIQUE,                               -- Alternativa de login (opcional)
+  password_hash VARCHAR(255) NOT NULL,                       -- Contraseña hasheada con bcrypt
+  rol ENUM('admin', 'empleado') DEFAULT 'empleado',          -- Rol institucional
+  activo BOOLEAN DEFAULT TRUE,                               -- Estado de acceso (activo/inactivo)
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,             -- Fecha de alta institucional
+  actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Última modificación
+  intentos_login INT DEFAULT 0,                              -- Intentos fallidos para control de seguridad
+  ultimo_login TIMESTAMP NULL                                -- Último acceso exitoso
 );

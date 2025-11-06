@@ -1,5 +1,3 @@
-
-       <!-- src/components/Header.vue -->
 <template>
   <header>
     <nav class="navbar navbar-expand-xl bgdwhite">
@@ -34,6 +32,17 @@
             <li class="nav-item">
               <RouterLink class="nav-link txtgreen" to="/contacto">Contacto</RouterLink>
             </li>
+
+            <!-- 👤 Usuario logueado -->
+            <li v-if="usuario" class="nav-item d-flex align-items-center me-3 txtgrey">
+              <span class="small">👤 {{ usuario.nombre }}</span>
+            </li>
+
+            <!-- 🔐 Login / Logout dinámico -->
+            <li class="nav-item">
+              <RouterLink v-if="!autenticado" class="btn btn-outline-primary" to="/login">Login</RouterLink>
+              <button v-else class="btn btn-outline-danger" @click="logout">Logout</button>
+            </li>
           </ul>
         </div>
       </div>
@@ -42,7 +51,28 @@
 </template>
 
 <script setup>
-// No se necesita lógica por ahora
+// Header institucional con login/logout y nombre del usuario
+
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { logout as cerrarSesion, getUsuario, getToken } from '@/services/authService.js';
+
+const router = useRouter();
+const autenticado = ref(false);
+const usuario = ref(null);
+
+// Detecta si hay token y carga usuario
+onMounted(() => {
+  autenticado.value = !!getToken();
+  usuario.value = getUsuario();
+});
+
+/**
+ * Cierra sesión institucional
+ */
+function logout() {
+  cerrarSesion();
+}
 </script>
 
 <style scoped>

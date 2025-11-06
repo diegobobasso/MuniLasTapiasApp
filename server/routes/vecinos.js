@@ -4,18 +4,19 @@ import {
   createVecino,
   getVecinoById,
   updateVecino,
-  deleteVecino
+  deleteVecino,
+  restaurarClaveVecino
 } from '../controllers/vecinosController.js';
-
-import { verificarToken } from '../middleware/verificarToken.js';
+import { verificarToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Rutas protegidas para gestión de vecinos
+// Rutas protegidas por token
 router.get('/', verificarToken, getVecinos);
-router.post('/', verificarToken, createVecino);
 router.get('/:id', verificarToken, getVecinoById);
+router.post('/', verificarToken, createVecino);
 router.put('/:id', verificarToken, updateVecino);
 router.delete('/:id', verificarToken, deleteVecino);
+router.put('/restaurar-clave/:id', verificarToken, restaurarClaveVecino);
 
 export default router;

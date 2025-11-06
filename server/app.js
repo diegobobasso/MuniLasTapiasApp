@@ -16,12 +16,16 @@ import eventosRouter from './routes/eventos.js';
 import conexionesRouter from './routes/conexiones.js';
 import consultasServiciosRouter from './routes/consultasServicios.js';
 
+import authRoutes from './routes/authRoutes.js';
+import empleadosRoutes from './routes/empleados.js';
+
 const app = express();
 
 app.use(cors()); // 🌐 Permitir CORS
 app.use(express.json()); // 📦 Parsear JSON
 
 // 🔐 Rutas protegidas con autenticación
+app.use('/api', authRoutes);
 app.use('/api/articulos', verificarToken, articulosRouter);
 app.use('/api/vecinos', verificarToken, vecinosRouter);
 app.use('/api/terrenos', verificarToken, terrenosRouter);
@@ -31,6 +35,7 @@ app.use('/api/denuncias', verificarToken, denunciasRouter);
 app.use('/api/eventos', verificarToken, eventosRouter);
 app.use('/api/conexiones', verificarToken, conexionesRouter);
 app.use('/api/archivos', verificarToken, archivosRouter);
+app.use('/api/empleados', verificarToken, empleadosRoutes);
 
 // 📁 Servir archivos subidos desde carpeta pública
 app.use('/uploads', express.static('./public/uploads'));
@@ -40,3 +45,4 @@ app.use('/api/sugerencias', sugerenciasRouter);
 app.use('/api/consultas/servicios', consultasServiciosRouter);
 
 export default app;
+

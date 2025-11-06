@@ -1,7 +1,11 @@
-// Importamos la conexión a la base de datos
+// controllers/vecinosController.js
 import db from '../models/db.js';
+import bcrypt from 'bcrypt';
 
-// Obtener todos los vecinos
+/**
+ * 📄 Obtener todos los vecinos
+ * Ordenados por apellido y nombre para panel institucional
+ */
 export const getVecinos = (req, res) => {
   db.query('SELECT * FROM vecinos ORDER BY apellido, nombre', (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -9,9 +13,23 @@ export const getVecinos = (req, res) => {
   });
 };
 
-// Crear un nuevo vecino
+/**
+ * ➕ Crear un nuevo vecino (solo empleados)
+ * Valida rol institucional y registra alta
+ */
 export const createVecino = (req, res) => {
-  const { nombre, apellido, dni, cuil_cuit, domicilio, telefono, email } = req.body;
+  const { nombre, apellido, dni, cuil_cuit, domicilio, telefono, email, password } = req.body;
+
+  // Validación de rol institucional
+  if (req.empleado.rol !== 'empleado') {
+    return res.status(403).json({ error: 'Solo empleados pueden dar de alta vecinos' });
+  }
+
+  // Hashea contraseña si se provee
+  let password_hash = null;
+  if (password) {
+    password_hash = bcrypt.hashSync(password, 10);
+  }
 
   const nuevoVecino = {
     nombre,
@@ -20,7 +38,10 @@ export const createVecino = (req, res) => {
     cuil_cuit,
     domicilio,
     telefono,
-    email
+    email,
+    password_hash,
+    fecha_alta: new Date(),
+    activo: true
   };
 
   db.query('INSERT INTO vecinos SET ?', nuevoVecino, (err, result) => {
@@ -29,7 +50,37 @@ export const createVecino = (req, res) => {
   });
 };
 
-// Obtener un vecino por ID
+/**
+ * 🔄 Restaurar contraseña de vecino (solo empleados)
+ * Reestablece la contraseña a una nueva segura
+ */
+export const restaurarClaveVecino = async (req, res) => {
+  const { id } = req.params;
+  const { nuevaClave } = req.body;
+
+  // Validación de rol institucional
+  if (req.empleado.rol !== 'empleado') {
+    return res.status(403).json({ error: 'Solo empleados pueden restaurar claves de vecinos' });
+  }
+
+  try {
+    const password_hash = await bcrypt.hash(nuevaClave, 10);
+    db.query(
+      'UPDATE vecinos SET password_hash = ? WHERE id = ?',
+      [password_hash, id],
+      (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ mensaje: 'Contraseña restaurada correctamente' });
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ error: 'Error al procesar la nueva contraseña' });
+  }
+};
+
+/**
+ * 📄 Obtener un vecino por ID
+ */
 export const getVecinoById = (req, res) => {
   const { id } = req.params;
 
@@ -40,7 +91,9 @@ export const getVecinoById = (req, res) => {
   });
 };
 
-// Actualizar un vecino existente
+/**
+ * ✏️ Actualizar un vecino existente
+ */
 export const updateVecino = (req, res) => {
   const { id } = req.params;
 
@@ -50,7 +103,9 @@ export const updateVecino = (req, res) => {
   });
 };
 
-// Eliminar un vecino
+/**
+ * 🗑️ Eliminar un vecino
+ */
 export const deleteVecino = (req, res) => {
   const { id } = req.params;
 
@@ -59,5 +114,3 @@ export const deleteVecino = (req, res) => {
     res.json({ mensaje: 'Vecino eliminado correctamente' });
   });
 };
-
-

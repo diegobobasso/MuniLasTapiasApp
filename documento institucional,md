@@ -1,0 +1,98 @@
+🛡️ Documento Institucional — Autenticación y Acceso
+📌 Propósito
+Este documento describe la arquitectura de autenticación del sistema de gestión municipal de Las Tapias, incluyendo protección por token, control de roles, expiración automática y trazabilidad institucional. También documenta el flujo de login desde el frontend hasta el backend.
+
+🔐 Arquitectura de Autenticación
+1. Backend
+verificarToken.js Middleware que valida el token JWT en cada request. Verifica formato Bearer <token> y firma con JWT_SECRET. Si es válido, guarda req.empleado con los datos del usuario. Si es inválido o vencido, responde con 403.
+
+requireRol.js (opcional) Middleware adicional para proteger rutas por rol (admin, empleado). Se aplica después de verificarToken. Ejemplo: router.post('/api/empleados', verificarToken, requireRol('admin'), handler)
+
+2. Frontend
+authService.js Servicio centralizado en src/services/authService.js. Funciones disponibles:
+
+login(email, password) → inicia sesión, guarda token y usuario
+
+logout() → limpia sesión y redirige
+
+getToken() / getUsuario() → acceso a datos actuales
+
+isTokenExpired() → detecta expiración automática
+
+router/index.js Usa requireAuth para proteger rutas por rol. Middleware global (router.beforeEach) detecta token vencido y ejecuta logout. Redirige automáticamente a /login si el token no existe o expiró.
+
+3. Componentes clave
+login.vue Usa authService.login() para iniciar sesión. Muestra errores institucionales. Redirige según rol (admin o empleado).
+
+Header.vue Muestra botón dinámico Login / Logout. Muestra nombre del usuario logueado (getUsuario()). Usa authService.logout() para cerrar sesión.
+
+panelInstitucional.vue Muestra nombre, email y rol del usuario. Filtra módulos según rol (admin, empleado).
+
+gestionVecinos.vue Alta y restauración de vecinos. Protegido por token y rol. Usa archivoEntidad.vue para adjuntos.
+
+📊 Tabla de Roles y Permisos
+Rol	Acceso a módulos
+admin	Panel institucional, Gestión de trámites, Sugerencias, Artículos, Empleados
+empleado	Panel institucional, Gestión de trámites, Sugerencias, Vecinos, Inspecciones
+vecino	Acceso público: Noticias, Ordenanzas, Visita, Contacto, Servicios, Pago pendiente
+🔄 Flujo de Login Institucional
+Usuario accede a /login
+
+Ingresa email y contraseña institucional
+
+Frontend (login.vue)
+
+Llama a authService.login(email, password)
+
+Muestra mensaje de carga y oculta errores previos
+
+authService.js
+
+Envía POST /api/login con credenciales
+
+Si el backend responde con éxito:
+
+Guarda token en localStorage
+
+Guarda usuario en localStorage
+
+Devuelve true
+
+Si falla:
+
+Devuelve false
+
+login.vue
+
+Si login() devuelve true:
+
+Obtiene el usuario con getUsuario()
+
+Redirige a /panel (o /admin si el rol es admin)
+
+Si devuelve false:
+
+Muestra mensaje de error institucional
+
+router/index.js
+
+Protege rutas con requireAuth
+
+Verifica token y rol antes de permitir acceso
+
+Middleware global detecta expiración automática y ejecuta logout()
+
+Header.vue
+
+Muestra nombre del usuario logueado
+
+Permite cerrar sesión manualmente con botón Logout
+
+📄 Recomendaciones
+Registrar logouts en el backend para trazabilidad (opcional)
+
+Agregar banners o alertas visuales si el token está por vencer
+
+Documentar nuevos roles y permisos en esta misma estructura
+
+Mantener authService.js como única fuente de verdad para autenticación

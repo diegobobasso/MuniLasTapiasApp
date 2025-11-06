@@ -1,6 +1,7 @@
 .
 |-- README.md
 |-- Tablas.md
+|-- estructura.sql
 |-- estructura.txt
 |-- insert.sql
 |-- limpieza.md
@@ -18,7 +19,8 @@
 |       |-- inspecciones
 |       `-- planos
 |-- scripts
-|   `-- limpiarArchivos.js
+|   |-- limpiarArchivos.js
+|   `-- verificarEntorno.js
 |-- server
 |   |-- app.js
 |   |-- controllers
@@ -27,6 +29,7 @@
 |   |   |-- conexionesController.js
 |   |   |-- consultasServiciosController.js
 |   |   |-- denunciasController.js
+|   |   |-- empleadosController.js
 |   |   |-- eventosController.js
 |   |   |-- inspeccionesController.js
 |   |   |-- mailController.js
@@ -43,6 +46,7 @@
 |   |-- routes
 |   |   |-- archivos.js
 |   |   |-- articulos.js
+|   |   |-- authRoutes.js
 |   |   |-- conexiones.js
 |   |   |-- consultasServicios.js
 |   |   |-- denuncias.js
@@ -63,6 +67,8 @@
 |   |   |-- banner.vue
 |   |   |-- footer.vue
 |   |   `-- header.vue
+|   |-- composables
+|   |   `-- useArchivoUploader.js
 |   |-- layouts
 |   |   `-- baseLayout.vue
 |   |-- main.js
@@ -95,4 +101,4 @@
 |-- tablas municipalidad.sql
 `-- vite.config.js
 
-20 directories, 75 files
+21 directories, 80 files

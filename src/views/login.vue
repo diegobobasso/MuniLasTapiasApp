@@ -2,70 +2,79 @@
   <baseLayout>
     <h2 class="text-center mb-4">Ingreso institucional</h2>
 
-    <!-- Formulario de login -->
-    <form @submit.prevent="login" class="mx-auto" style="max-width: 400px">
-      <!-- Campo Email -->
+    <!-- Formulario de login institucional -->
+    <form @submit.prevent="iniciarSesion" class="mx-auto" style="max-width: 400px">
       <div class="mb-3">
         <label for="email" class="form-label">Email institucional</label>
-        <input v-model="email" type="email" class="form-control" required />
+        <input
+          v-model="email"
+          type="email"
+          class="form-control"
+          required
+          placeholder="usuario@municipio.gob.ar"
+        />
       </div>
 
-      <!-- Campo Contraseña -->
       <div class="mb-3">
         <label for="password" class="form-label">Contraseña</label>
-        <input v-model="password" type="password" class="form-control" required />
+        <input
+          v-model="password"
+          type="password"
+          class="form-control"
+          required
+          placeholder="••••••••"
+        />
       </div>
 
-      <!-- Mensaje de error -->
-      <div v-if="error" class="text-danger mb-3">{{ error }}</div>
+      <div v-if="error" class="text-danger mb-3">
+        {{ error }}
+      </div>
 
-      <!-- Botón de ingreso -->
-      <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+      <button type="submit" class="btn btn-primary w-100" :disabled="loading">
+        {{ loading ? 'Ingresando...' : 'Ingresar' }}
+      </button>
     </form>
   </baseLayout>
 </template>
 
 <script setup>
+// Componente institucional de login
+// Usa authService para gestionar sesión y redirigir según rol
+
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import baseLayout from '@/layouts/baseLayout.vue';
+import { login as loginService, getUsuario } from '@/services/authService.js';
 
 const email = ref('');
 const password = ref('');
 const error = ref('');
+const loading = ref(false);
 const router = useRouter();
 
-// Validación y envío al backend
-const login = async () => {
+/**
+ * Inicia sesión institucional usando authService
+ */
+const iniciarSesion = async () => {
   error.value = '';
+  loading.value = true;
 
-  // Validación básica
   if (!email.value || !password.value) {
     error.value = 'Completá todos los campos.';
+    loading.value = false;
     return;
   }
 
-  try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value })
-    });
+  const ok = await loginService(email.value, password.value);
 
-    const data = await res.json();
-
-    if (res.ok && data.success) {
-      // Guarda el token en localStorage
-      localStorage.setItem('token', data.token);
-
-      // Redirige al panel institucional
-      router.push('/panel');
-    } else {
-      error.value = data.error || 'Credenciales inválidas.';
-    }
-  } catch (err) {
-    error.value = 'Error de conexión con el servidor.';
+  if (ok) {
+    const usuario = getUsuario();
+    const destino = usuario.rol === 'admin' ? '/panel' : '/panel';
+    router.push(destino);
+  } else {
+    error.value = 'Credenciales inválidas o usuario no autorizado.';
   }
+
+  loading.value = false;
 };
 </script>
-
