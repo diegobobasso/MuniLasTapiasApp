@@ -1,0 +1,1 @@
+node scripts/limpiarArchivos.js

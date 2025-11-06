@@ -1,0 +1,98 @@
+.
+|-- README.md
+|-- Tablas.md
+|-- estructura.txt
+|-- insert.sql
+|-- limpieza.md
+|-- logs
+|-- package-lock.json
+|-- package.json
+|-- public
+|   |-- css
+|   |   `-- style.css
+|   |-- index.html
+|   |-- multimedia
+|   |   |-- img
+|   |   `-- videos
+|   `-- uploads
+|       |-- inspecciones
+|       `-- planos
+|-- scripts
+|   `-- limpiarArchivos.js
+|-- server
+|   |-- app.js
+|   |-- controllers
+|   |   |-- archivosController.js
+|   |   |-- authController.js
+|   |   |-- conexionesController.js
+|   |   |-- consultasServiciosController.js
+|   |   |-- denunciasController.js
+|   |   |-- eventosController.js
+|   |   |-- inspeccionesController.js
+|   |   |-- mailController.js
+|   |   |-- negociosController.js
+|   |   |-- sugerenciasController.js
+|   |   |-- terrenosController.js
+|   |   |-- tramitesController.js
+|   |   `-- vecinosController.js
+|   |-- middleware
+|   |   |-- authMiddleware.js
+|   |   `-- verificarToken.js
+|   |-- models
+|   |   `-- db.js
+|   |-- routes
+|   |   |-- archivos.js
+|   |   |-- articulos.js
+|   |   |-- conexiones.js
+|   |   |-- consultasServicios.js
+|   |   |-- denuncias.js
+|   |   |-- eventos.js
+|   |   |-- inspecciones.js
+|   |   |-- negocios.js
+|   |   |-- sugerencias.js
+|   |   |-- terrenos.js
+|   |   |-- tramites.js
+|   |   `-- vecinos.js
+|   `-- server.js
+|-- src
+|   |-- app.vue
+|   |-- components
+|   |   |-- adminCard.vue
+|   |   |-- archivoEntidad.vue
+|   |   |-- articleCard.vue
+|   |   |-- banner.vue
+|   |   |-- footer.vue
+|   |   `-- header.vue
+|   |-- layouts
+|   |   `-- baseLayout.vue
+|   |-- main.js
+|   |-- router
+|   |   `-- index.js
+|   `-- views
+|       |-- adminLayout.vue
+|       |-- adminSugerencias.vue
+|       |-- autoridades.vue
+|       |-- consultaServicios.vue
+|       |-- contacto.vue
+|       |-- error.vue
+|       |-- gestionArchivos.vue
+|       |-- gestionArticulos.vue
+|       |-- gestionConexiones.vue
+|       |-- gestionInspecciones.vue
+|       |-- gestionNegocios.vue
+|       |-- gestionSugerencias.vue
+|       |-- gestionTerrenos.vue
+|       |-- gestionTramites.vue
+|       |-- gestionVecinos.vue
+|       |-- gracias.vue
+|       |-- home.vue
+|       |-- login.vue
+|       |-- noticias.vue
+|       |-- ordenanzas.vue
+|       |-- pagoPendiente.vue
+|       |-- panelInstitucional.vue
+|       `-- visita.vue
+|-- tablas municipalidad.sql
+`-- vite.config.js
+
+20 directories, 75 files
