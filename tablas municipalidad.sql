@@ -1,26 +1,25 @@
--- 📘 Tablas Municipales - Modelo Relacional
-
+-- 📘 Tablas Municipales - Modelo Relacional Corregido
 
 -- Crear base de datos
-CREATE DATABASE municipalidad CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE IF NOT EXISTS municipalidad CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE municipalidad;
 
 -- Tabla vecinos
 CREATE TABLE vecinos (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  nombre VARCHAR(100),
-  apellido VARCHAR(100),
-  dni VARCHAR(20),
+  nombre VARCHAR(100) NOT NULL,
+  apellido VARCHAR(100) NOT NULL,
+  dni VARCHAR(20) UNIQUE NOT NULL,
   cuil_cuit VARCHAR(20),
   domicilio VARCHAR(255),
   telefono VARCHAR(50),
-  email VARCHAR(100)
+  email VARCHAR(100) UNIQUE
 );
 
 -- Tabla terrenos
 CREATE TABLE terrenos (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  partida VARCHAR(20),
+  partida VARCHAR(20) UNIQUE,
   cuenta VARCHAR(20),
   direccion VARCHAR(255),
   superficie_total DECIMAL(10,2),
@@ -33,8 +32,8 @@ CREATE TABLE terrenos (
   planos_ruta VARCHAR(255),
   propietario_id INT,
   representante_id INT,
-  FOREIGN KEY (propietario_id) REFERENCES vecinos(id),
-  FOREIGN KEY (representante_id) REFERENCES vecinos(id)
+  FOREIGN KEY (propietario_id) REFERENCES vecinos(id) ON DELETE SET NULL,
+  FOREIGN KEY (representante_id) REFERENCES vecinos(id) ON DELETE SET NULL
 );
 
 -- Tabla negocios
@@ -46,8 +45,8 @@ CREATE TABLE negocios (
   titular_id INT,
   terreno_id INT,
   inspeccionado BOOLEAN DEFAULT FALSE,
-  FOREIGN KEY (titular_id) REFERENCES vecinos(id),
-  FOREIGN KEY (terreno_id) REFERENCES terrenos(id)
+  FOREIGN KEY (titular_id) REFERENCES vecinos(id) ON DELETE SET NULL,
+  FOREIGN KEY (terreno_id) REFERENCES terrenos(id) ON DELETE SET NULL
 );
 
 -- Tabla conexiones_agua
@@ -58,7 +57,7 @@ CREATE TABLE conexiones_agua (
   medidor VARCHAR(50),
   fecha_alta DATE,
   uso_especial ENUM('residencial', 'pileta', 'comercial', 'mixto'),
-  FOREIGN KEY (terreno_id) REFERENCES terrenos(id)
+  FOREIGN KEY (terreno_id) REFERENCES terrenos(id) ON DELETE CASCADE
 );
 
 -- Tabla inspecciones
@@ -75,15 +74,15 @@ CREATE TABLE inspecciones (
   negocio_id INT,
   incluye_conexion_agua BOOLEAN DEFAULT FALSE,
   resultado TEXT,
-  FOREIGN KEY (terreno_id) REFERENCES terrenos(id),
-  FOREIGN KEY (negocio_id) REFERENCES negocios(id)
+  FOREIGN KEY (terreno_id) REFERENCES terrenos(id) ON DELETE SET NULL,
+  FOREIGN KEY (negocio_id) REFERENCES negocios(id) ON DELETE SET NULL
 );
 
 -- Tabla archivos
 CREATE TABLE archivos (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  entidad_origen VARCHAR(50),   -- Ej: 'inspeccion', 'tramite', 'negocio'
-  origen_id INT,                -- ID de la entidad vinculada
+  entidad_origen VARCHAR(50),
+  origen_id INT,
   nombre_archivo VARCHAR(255),
   ruta_archivo VARCHAR(255),
   tipo_mime VARCHAR(100),
@@ -102,8 +101,8 @@ CREATE TABLE tasas_municipales (
   fecha_emision DATE,
   fecha_vencimiento DATE,
   estado ENUM('pendiente', 'pagada', 'vencida') DEFAULT 'pendiente',
-  FOREIGN KEY (terreno_id) REFERENCES terrenos(id),
-  FOREIGN KEY (negocio_id) REFERENCES negocios(id)
+  FOREIGN KEY (terreno_id) REFERENCES terrenos(id) ON DELETE SET NULL,
+  FOREIGN KEY (negocio_id) REFERENCES negocios(id) ON DELETE SET NULL
 );
 
 -- Tabla eventos
@@ -128,7 +127,7 @@ CREATE TABLE tramites (
   fecha_resolucion DATE,
   estado ENUM('pendiente', 'en_proceso', 'resuelto', 'rechazado') DEFAULT 'pendiente',
   resultado TEXT,
-  FOREIGN KEY (vecino_id) REFERENCES vecinos(id)
+  FOREIGN KEY (vecino_id) REFERENCES vecinos(id) ON DELETE SET NULL
 );
 
 -- Tabla denuncias
@@ -142,8 +141,8 @@ CREATE TABLE denuncias (
   estado ENUM('pendiente', 'investigando', 'resuelta', 'archivada') DEFAULT 'pendiente',
   terreno_id INT,
   negocio_id INT,
-  FOREIGN KEY (terreno_id) REFERENCES terrenos(id),
-  FOREIGN KEY (negocio_id) REFERENCES negocios(id)
+  FOREIGN KEY (terreno_id) REFERENCES terrenos(id) ON DELETE SET NULL,
+  FOREIGN KEY (negocio_id) REFERENCES negocios(id) ON DELETE SET NULL
 );
 
 -- Tabla sugerencias
@@ -158,21 +157,21 @@ CREATE TABLE sugerencias (
   vecino_id INT,
   respuesta TEXT,
   fecha_respuesta DATE,
-  FOREIGN KEY (vecino_id) REFERENCES vecinos(id)
+  FOREIGN KEY (vecino_id) REFERENCES vecinos(id) ON DELETE SET NULL
 );
 
 -- Tabla empleados
 CREATE TABLE empleados (
-  id INT AUTO_INCREMENT PRIMARY KEY,                         -- Identificador único
-  nombre VARCHAR(100) NOT NULL,                              -- Nombre completo del empleado
-  email VARCHAR(100) UNIQUE NOT NULL,                        -- Email institucional (clave de login)
-  dni VARCHAR(20) UNIQUE,                                    -- Documento nacional para trazabilidad
-  username VARCHAR(50) UNIQUE,                               -- Alternativa de login (opcional)
-  password_hash VARCHAR(255) NOT NULL,                       -- Contraseña hasheada con bcrypt
-  rol ENUM('admin', 'empleado') DEFAULT 'empleado',          -- Rol institucional
-  activo BOOLEAN DEFAULT TRUE,                               -- Estado de acceso (activo/inactivo)
-  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,             -- Fecha de alta institucional
-  actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Última modificación
-  intentos_login INT DEFAULT 0,                              -- Intentos fallidos para control de seguridad
-  ultimo_login TIMESTAMP NULL                                -- Último acceso exitoso
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  dni VARCHAR(20) UNIQUE NOT NULL,
+  username VARCHAR(50) UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  rol ENUM('admin', 'empleado') DEFAULT 'empleado',
+  activo BOOLEAN DEFAULT TRUE,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  intentos_login INT DEFAULT 0,
+  ultimo_login TIMESTAMP NULL
 );

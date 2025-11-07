@@ -5,8 +5,8 @@ import { loginEmpleado } from '../controllers/authController.js';
 const router = express.Router();
 
 /**
- * Ruta institucional de login.
- * POST /api/login
+ * 🔐 Login institucional de empleados
+ * POST /auth/login
  */
 router.post('/login', loginEmpleado);
 

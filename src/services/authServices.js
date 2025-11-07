@@ -1,5 +1,3 @@
-// src/services/authService.js
-
 /**
  * 🔐 Servicio institucional de autenticación
  * Centraliza login, logout, expiración y acceso al usuario
@@ -71,4 +69,30 @@ export function isTokenExpired() {
   } catch (err) {
     return true;
   }
+}
+
+/**
+ * 🔍 Verifica si el sistema está virgen (sin administradores activos)
+ * @returns {Promise<{sistemaVirgen: boolean}>}
+ */
+export async function verificarSistemaVirgen() {
+  const res = await fetch('/admin/bootstrap/estado');
+  if (!res.ok) throw new Error('No se pudo verificar el estado del sistema');
+  return await res.json();
+}
+
+/**
+ * 🛠 Crea el primer superadministrador institucional
+ * @param {string} username
+ * @param {string} password
+ * @returns {Promise<boolean>} true si creación exitosa
+ */
+export async function crearSuperadmin(username, password) {
+  const res = await fetch('/admin/bootstrap', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, nuevaPassword: password })
+  });
+
+  return res.ok;
 }

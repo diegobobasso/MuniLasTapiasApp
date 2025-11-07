@@ -2,8 +2,11 @@
   <baseLayout>
     <h2 class="text-center mb-4">Ingreso institucional</h2>
 
-    <!-- Formulario de login institucional -->
-    <form @submit.prevent="iniciarSesion" class="mx-auto" style="max-width: 400px">
+    <!-- 🛠 Primer ingreso: creación de superadministrador -->
+    <FormularioBootstrap v-if="sistemaVirgen" @creado="sistemaVirgen = false" />
+
+    <!-- 🔐 Login normal -->
+    <form v-else @submit.prevent="iniciarSesion" class="mx-auto" style="max-width: 400px">
       <div class="mb-3">
         <label for="email" class="form-label">Email institucional</label>
         <input
@@ -38,39 +41,47 @@
 </template>
 
 <script setup>
-// Componente institucional de login
-// Usa authService para gestionar sesión y redirigir según rol
-
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import baseLayout from '@/layouts/baseLayout.vue';
-import { login as loginService, getUsuario } from '@/services/authService.js';
+import FormularioBootstrap from '@/components/FormularioBootstrap.vue';
+import {
+  login as loginService,
+  getUsuario,
+  verificarSistemaVirgen
+} from '@/services/authService.js';
 
 const email = ref('');
 const password = ref('');
 const error = ref('');
 const loading = ref(false);
+const sistemaVirgen = ref(false);
 const router = useRouter();
 
 /**
- * Inicia sesión institucional usando authService
+ * Detecta si el sistema está virgen
+ */
+onMounted(async () => {
+  try {
+    const estado = await verificarSistemaVirgen();
+    sistemaVirgen.value = estado.sistemaVirgen;
+  } catch (err) {
+    console.error('Error al verificar estado del sistema:', err);
+  }
+});
+
+/**
+ * Inicia sesión institucional
  */
 const iniciarSesion = async () => {
   error.value = '';
   loading.value = true;
 
-  if (!email.value || !password.value) {
-    error.value = 'Completá todos los campos.';
-    loading.value = false;
-    return;
-  }
-
   const ok = await loginService(email.value, password.value);
 
   if (ok) {
     const usuario = getUsuario();
-    const destino = usuario.rol === 'admin' ? '/panel' : '/panel';
-    router.push(destino);
+    router.push('/panel');
   } else {
     error.value = 'Credenciales inválidas o usuario no autorizado.';
   }
@@ -78,3 +89,4 @@ const iniciarSesion = async () => {
   loading.value = false;
 };
 </script>
+
