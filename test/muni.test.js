@@ -56,9 +56,10 @@ describe('🏛️ Tests institucionales completos', function() {
           rol: 'empleado'
         });
       
-      // ✅ CORREGIDO: Usar res.body.empleado.nombre en lugar de res.body.nombre
+      // ✅ CORREGIDO: Nueva estructura de respuesta
       if (res.status === 201) {
-        expect(res.body.empleado.nombre).to.equal('Diego'); // ← LÍNEA CORREGIDA
+        expect(res.body.success).to.be.true;
+        expect(res.body.data.empleado.nombre).to.equal('Diego'); // ← LÍNEA CORREGIDA
       } else {
         expect(res.status).to.not.equal(403);
       }
@@ -71,7 +72,13 @@ describe('🏛️ Tests institucionales completos', function() {
         .set('Authorization', token)
         .send({ nuevaClave: 'nueva123' });
       
-      expect([200, 404, 400]).to.include(res.status);
+      // ✅ CORREGIDO: Verificar nueva estructura
+      if (res.status === 200) {
+        expect(res.body.success).to.be.true;
+        expect(res.body.data.empleadoId).to.equal(1);
+      } else {
+        expect([200, 404, 400]).to.include(res.status);
+      }
     });
 
     it('🧾 registra trazabilidad en accesos.log', function() {
@@ -101,9 +108,10 @@ describe('🏛️ Tests institucionales completos', function() {
           password: 'clave123'
         });
       
-      // ✅ CORREGIDO: Usar res.body.vecino.nombre en lugar de res.body.nombre
+      // ✅ CORREGIDO: Nueva estructura de respuesta
       if (res.status === 201) {
-        expect(res.body.vecino.nombre).to.equal('Juan'); // ← LÍNEA CORREGIDA
+        expect(res.body.success).to.be.true;
+        expect(res.body.data.vecino.nombre).to.equal('Juan'); // ← LÍNEA CORREGIDA
       } else {
         expect(res.status).to.not.equal(403);
       }
@@ -116,7 +124,13 @@ describe('🏛️ Tests institucionales completos', function() {
         .set('Authorization', token)
         .send({ nuevaClave: 'nueva456' });
       
-      expect([200, 404, 400]).to.include(res.status);
+      // ✅ CORREGIDO: Verificar nueva estructura
+      if (res.status === 200) {
+        expect(res.body.success).to.be.true;
+        expect(res.body.data.vecinoId).to.equal(1);
+      } else {
+        expect([200, 404, 400]).to.include(res.status);
+      }
     });
 
     it('🧾 registra trazabilidad en accesos.log', function() {
