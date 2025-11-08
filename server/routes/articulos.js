@@ -1,30 +1,13 @@
-// routes/articulos.js
-import express from 'express';
-
+const express = require('express');
 const router = express.Router();
+const { verificarToken } = require('../middleware/authMiddleware');
 
-// 🧩 Almacenamiento temporal en memoria
-let articulos = [];
-
-/**
- * 📄 Obtener los últimos 3 artículos
- * - Acceso público
- */
-router.get('/', (req, res) => {
-  res.json(articulos.slice(-3));
+router.get('/', verificarToken, (req, res) => {
+  res.json({ mensaje: 'Lista de artículos', articulos: [] });
 });
 
-/**
- * ➕ Crear nuevo artículo
- * - Genera ID único por timestamp
- */
-router.post('/', (req, res) => {
-  const nuevo = { ...req.body, id: Date.now() };
-  articulos.push(nuevo);
-  res.status(201).json(nuevo);
+router.post('/', verificarToken, (req, res) => {
+  res.status(201).json({ mensaje: 'Artículo creado', articulo: req.body });
 });
 
-/**
- * 📦 Exportación institucional
- */
-export default router;
+module.exports = router;

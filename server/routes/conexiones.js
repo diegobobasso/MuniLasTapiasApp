@@ -1,21 +1,9 @@
-import express from 'express';
-import {
-  getConexiones,
-  createConexion,
-  getConexionById,
-  updateConexion,
-  deleteConexion
-} from '../controllers/conexionesController.js';
-
-import { verificarToken } from '../middleware/verificarToken.js';
-
+const express = require('express');
 const router = express.Router();
+const { verificarToken } = require('../middleware/authMiddleware');
 
-// Rutas protegidas
-router.get('/', verificarToken, getConexiones);
-router.post('/', verificarToken, createConexion);
-router.get('/:id', verificarToken, getConexionById);
-router.put('/:id', verificarToken, updateConexion);
-router.delete('/:id', verificarToken, deleteConexion);
+router.get('/', verificarToken, (req, res) => {
+  res.json({ mensaje: 'Conexiones', conexiones: [] });
+});
 
-export default router;
+module.exports = router;

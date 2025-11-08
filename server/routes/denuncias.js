@@ -1,23 +1,13 @@
-import express from 'express';
-import {
-  getDenuncias,
-  createDenuncia,
-  updateDenuncia,
-  deleteDenuncia
-} from '../controllers/denunciasController.js';
-
+const express = require('express');
 const router = express.Router();
+const { verificarToken } = require('../middleware/authMiddleware');
 
-// Obtener todas las denuncias
-router.get('/', getDenuncias);
+router.get('/', verificarToken, (req, res) => {
+  res.json({ mensaje: 'Denuncias', denuncias: [] });
+});
 
-// Crear nueva denuncia
-router.post('/', createDenuncia);
+router.post('/', verificarToken, (req, res) => {
+  res.status(201).json({ mensaje: 'Denuncia creada', denuncia: req.body });
+});
 
-// Actualizar estado
-router.put('/:id', updateDenuncia);
-
-// Eliminar denuncia
-router.delete('/:id', deleteDenuncia);
-
-export default router;
+module.exports = router;

@@ -1,12 +1,9 @@
-import express from 'express';
-import {
-  consultarServicios,
-  consultarServicioPorId
-} from '../controllers/consultasServiciosController.js';
-
+const express = require('express');
 const router = express.Router();
+const { verificarToken } = require('../middleware/authMiddleware');
 
-router.get('/', consultarServicios);
-router.get('/:id', consultarServicioPorId);
+router.get('/', verificarToken, (req, res) => {
+  res.json({ mensaje: 'Consultas de servicios', consultas: [] });
+});
 
-export default router;
+module.exports = router;

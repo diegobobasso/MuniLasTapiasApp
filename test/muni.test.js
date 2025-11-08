@@ -4,15 +4,15 @@
 
 const { expect, getToken, expectLogMatch } = require('./setupGlobal.js');
 const request = require('supertest');
-const app = require('../server/server.js'); // ✅ Corregida la ruta
+const app = require('../server/server.js');
 
 describe('🏛️ Tests institucionales completos', function() {
   let token;
-  this.timeout(10000); // ✅ Aumentar timeout para tests
+  this.timeout(10000);
 
   // 🔐 Login institucional antes de todos los tests
   before(async function() {
-    const rawToken = getToken('admin'); // ✅ admin por defecto
+    const rawToken = getToken('admin');
     token = `Bearer ${rawToken}`;
   });
 
@@ -22,7 +22,7 @@ describe('🏛️ Tests institucionales completos', function() {
   describe('🔐 Middleware de autenticación institucional', function() {
     it('🚫 rechaza peticiones sin token', async function() {
       const res = await request(app).get('/api/empleados');
-      expect(res.status).to.equal(403); // ✅ Cambiado a 403 (coherente con tu middleware)
+      expect(res.status).to.equal(403);
     });
 
     it('🚫 rechaza peticiones con token inválido', async function() {
@@ -36,7 +36,6 @@ describe('🏛️ Tests institucionales completos', function() {
       const res = await request(app)
         .get('/api/empleados')
         .set('Authorization', token);
-      // ✅ Expectativas más flexibles para desarrollo
       expect(res.status).to.not.equal(403);
       expect(res.status).to.not.equal(401);
     });
@@ -56,28 +55,26 @@ describe('🏛️ Tests institucionales completos', function() {
           password: 'segura123',
           rol: 'empleado'
         });
-      // ✅ Expectativas realistas según estado del backend
+      
+      // ✅ CORREGIDO: Usar res.body.empleado.nombre en lugar de res.body.nombre
       if (res.status === 201) {
-        expect(res.body.nombre).to.equal('Diego');
+        expect(res.body.empleado.nombre).to.equal('Diego'); // ← LÍNEA CORREGIDA
       } else {
-        // Si falla, al menos verificar que no es error de autenticación
         expect(res.status).to.not.equal(403);
       }
     });
 
     it('🔁 restaura contraseña de empleado', async function() {
-      const id = 1; // Asegurarse que el empleado exista
+      const id = 1;
       const res = await request(app)
         .put(`/api/empleados/${id}/restaurar-clave`)
         .set('Authorization', token)
         .send({ nuevaClave: 'nueva123' });
       
-      // ✅ Manejar diferentes respuestas posibles
       expect([200, 404, 400]).to.include(res.status);
     });
 
     it('🧾 registra trazabilidad en accesos.log', function() {
-      // ✅ Esta función se ejecutará después de las peticiones anteriores
       try {
         expectLogMatch(/admin accedió a \\?\/api\\?\/empleados/);
       } catch (error) {
@@ -104,9 +101,9 @@ describe('🏛️ Tests institucionales completos', function() {
           password: 'clave123'
         });
       
-      // ✅ Expectativas realistas
+      // ✅ CORREGIDO: Usar res.body.vecino.nombre en lugar de res.body.nombre
       if (res.status === 201) {
-        expect(res.body.nombre).to.equal('Juan');
+        expect(res.body.vecino.nombre).to.equal('Juan'); // ← LÍNEA CORREGIDA
       } else {
         expect(res.status).to.not.equal(403);
       }
@@ -144,7 +141,6 @@ describe('🏛️ Tests institucionales completos', function() {
         .post('/api/auth/login')
         .send({ username, password: passwordTemporal });
       
-      // ✅ Manejar diferentes escenarios
       expect([403, 404, 401]).to.include(res.status);
     });
 
@@ -161,7 +157,6 @@ describe('🏛️ Tests institucionales completos', function() {
         .post('/api/auth/login')
         .send({ username, password: nuevaPassword });
       
-      // ✅ Si el login es exitoso, debería tener token
       if (res.status === 200) {
         expect(res.body).to.have.property('token');
       }
@@ -181,7 +176,6 @@ describe('🏛️ Tests institucionales completos', function() {
   // ----------------------------
   describe('📊 Trazabilidad institucional de acciones', function() {
     it('🧾 debe registrar logs de acceso', async function() {
-      // Simula acceso protegido para generar trazabilidad
       await request(app)
         .get('/api/empleados')
         .set('Authorization', token);

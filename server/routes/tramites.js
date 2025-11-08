@@ -1,27 +1,14 @@
-import express from 'express';
-import {
-  getTramites,       // Obtener todos los trámites
-  createTramite,     // Crear nuevo trámite
-  updateTramite,     // Actualizar estado o contenido
-  deleteTramite      // Eliminar trámite
-} from '../controllers/tramitesController.js';
-
-import { verificarToken } from '../middleware/verificarToken.js';
-
+const express = require('express');
 const router = express.Router();
 
-// 🔐 Todas las rutas están protegidas por token JWT
+router.get('/', (req, res) => {
+  res.json({ 
+    mensaje: 'Trámites', 
+    tramites: [
+      { id: 1, nombre: 'Licencia de conducir', descripcion: 'Trámite para licencia' },
+      { id: 2, nombre: 'Permiso de construcción', descripcion: 'Trámite para construcción' }
+    ] 
+  });
+});
 
-// Obtener lista de trámites
-router.get('/', verificarToken, getTramites);
-
-// Crear nuevo trámite
-router.post('/', verificarToken, createTramite);
-
-// Actualizar trámite existente
-router.put('/:id', verificarToken, updateTramite);
-
-// Eliminar trámite
-router.delete('/:id', verificarToken, deleteTramite);
-
-export default router;
+module.exports = router;

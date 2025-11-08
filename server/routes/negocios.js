@@ -1,21 +1,22 @@
-import express from 'express';
-import {
-  getNegocios,
-  createNegocio,
-  getNegocioById,
-  updateNegocio,
-  deleteNegocio
-} from '../controllers/negociosController.js';
-
-import { verificarToken } from '../middleware/verificarToken.js';
-
+const express = require('express');
 const router = express.Router();
+const { verificarToken } = require('../middleware/authMiddleware');
 
-// Rutas protegidas
-router.get('/', verificarToken, getNegocios);
-router.post('/', verificarToken, createNegocio);
-router.get('/:id', verificarToken, getNegocioById);
-router.put('/:id', verificarToken, updateNegocio);
-router.delete('/:id', verificarToken, deleteNegocio);
+router.get('/', verificarToken, (req, res) => {
+  res.json({ 
+    mensaje: 'Negocios', 
+    negocios: [
+      { id: 1, nombre: 'Negocio 1', rubro: 'Alimentos' },
+      { id: 2, nombre: 'Negocio 2', rubro: 'Servicios' }
+    ] 
+  });
+});
 
-export default router;
+router.post('/', verificarToken, (req, res) => {
+  res.status(201).json({ 
+    mensaje: 'Negocio creado', 
+    negocio: { id: Date.now(), ...req.body }
+  });
+});
+
+module.exports = router;

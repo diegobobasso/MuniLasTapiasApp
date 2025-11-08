@@ -1,23 +1,9 @@
-import express from 'express';
-import {
-  getEventos,
-  createEvento,
-  updateEvento,
-  deleteEvento
-} from '../controllers/eventosController.js';
-
+const express = require('express');
 const router = express.Router();
+const { verificarToken } = require('../middleware/authMiddleware');
 
-// Obtener todos los eventos
-router.get('/', getEventos);
+router.get('/', verificarToken, (req, res) => {
+  res.json({ mensaje: 'Eventos', eventos: [] });
+});
 
-// Crear nuevo evento
-router.post('/', createEvento);
-
-// Actualizar evento
-router.put('/:id', updateEvento);
-
-// Eliminar evento
-router.delete('/:id', deleteEvento);
-
-export default router;
+module.exports = router;

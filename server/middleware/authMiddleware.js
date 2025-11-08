@@ -1,12 +1,11 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-// ✅ CORREGIDO: Exportación nombrada correcta
-export const verificarToken = (req, res, next) => {
+// ✅ MIDDLEWARE DE AUTENTICACIÓN - COMMONJS
+const verificarToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   console.log('🔐 Verificando token...');
-  console.log('🔐 Header Authorization:', req.headers['authorization']);
   console.log('🔐 Token extraído:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
 
   if (!token) {
@@ -15,15 +14,13 @@ export const verificarToken = (req, res, next) => {
   }
 
   try {
-    // ✅ VERIFICAR QUE JWT_SECRET EXISTA
     if (!process.env.JWT_SECRET) {
-      console.error('❌ JWT_SECRET no configurado en variables de entorno');
+      console.error('❌ JWT_SECRET no configurado');
       return res.status(500).json({ error: 'Error de configuración del servidor' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // ✅ VALIDAR ESTRUCTURA DEL TOKEN
     if (!decoded.id || !decoded.rol) {
       console.log('❌ Token con estructura inválida:', decoded);
       return res.status(403).json({ error: 'Token con estructura inválida' });
@@ -45,8 +42,8 @@ export const verificarToken = (req, res, next) => {
   }
 };
 
-// ✅ CORREGIDO: Exportación nombrada para autorización de roles
-export const autorizarRoles = (...roles) => {
+// ✅ MIDDLEWARE DE AUTORIZACIÓN
+const autorizarRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(403).json({ error: 'Usuario no autenticado' });
@@ -64,5 +61,8 @@ export const autorizarRoles = (...roles) => {
   };
 };
 
-// ✅ OPCIÓN ALTERNATIVA: Si prefieres exportación por defecto
-// export default { verificarToken, autorizarRoles };
+// ✅ EXPORTAR EN COMMONJS
+module.exports = {
+  verificarToken,
+  autorizarRoles
+};
