@@ -1,51 +1,68 @@
 import jwt from 'jsonwebtoken';
-import { logAcceso } from '../utils/logger.js';
 
-/**
- * 🔐 Middleware institucional para verificar token JWT
- * - Valida formato "Bearer <token>"
- * - Decodifica y verifica firma con JWT_SECRET
- * - Guarda datos del usuario en req.empleado o req.vecino
- * - Registra trazabilidad en logs/accesos.log
- */
+// ✅ CORREGIDO: Exportación nombrada correcta
 export const verificarToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
 
-  // 🚫 Token ausente o mal formado
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.warn(`[${new Date().toISOString()}] Token no proporcionado`);
-    return res.status(401).json({ error: 'Token no proporcionado' });
+  console.log('🔐 Verificando token...');
+  console.log('🔐 Header Authorization:', req.headers['authorization']);
+  console.log('🔐 Token extraído:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
+
+  if (!token) {
+    console.log('❌ Token no proporcionado');
+    return res.status(403).json({ error: 'Token no proporcionado' });
   }
-
-  // 🔍 Extraer token
-  const token = authHeader.split(' ')[1];
 
   try {
-    // ✅ Verificar firma y decodificar
+    // ✅ VERIFICAR QUE JWT_SECRET EXISTA
+    if (!process.env.JWT_SECRET) {
+      console.error('❌ JWT_SECRET no configurado en variables de entorno');
+      return res.status(500).json({ error: 'Error de configuración del servidor' });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // 🚫 Token sin campos mínimos requeridos
-    if (!decoded || !decoded.id || !decoded.rol) {
-      console.warn(`[${new Date().toISOString()}] Token incompleto o mal formado`);
-      return res.status(403).json({ error: 'Token inválido o incompleto' });
+    
+    // ✅ VALIDAR ESTRUCTURA DEL TOKEN
+    if (!decoded.id || !decoded.rol) {
+      console.log('❌ Token con estructura inválida:', decoded);
+      return res.status(403).json({ error: 'Token con estructura inválida' });
     }
-
-    // 🧍‍♂️ Asignar usuario según rol
-    if (decoded.rol === 'vecino') {
-      req.vecino = decoded;
+    
+    req.user = decoded;
+    console.log(`✅ Token válido para usuario: ${decoded.email}, rol: ${decoded.rol}`);
+    next();
+  } catch (error) {
+    console.error('❌ Error verificando token:', error.message);
+    
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(403).json({ error: 'Token inválido: jwt malformed' });
+    } else if (error.name === 'TokenExpiredError') {
+      return res.status(403).json({ error: 'Token expirado' });
     } else {
-      req.empleado = decoded;
+      return res.status(403).json({ error: `Error de autenticación: ${error.message}` });
     }
-
-    // 🧾 Registrar trazabilidad
-    logAcceso(`${decoded.rol} accedió a ${req.originalUrl}`);
-    console.info(`[${new Date().toISOString()}] Token verificado para: ${decoded.email || decoded.dni} (rol: ${decoded.rol})`);
-
-    next(); // ✅ Continuar con la ruta protegida
-  } catch (err) {
-    // 🚫 Token inválido o expirado
-    const mensaje = `[${new Date().toISOString()}] Token inválido: ${err.message}`;
-    process.env.NODE_ENV === 'development' ? console.error(mensaje) : console.warn(mensaje);
-    return res.status(403).json({ error: 'Token inválido o expirado' });
   }
 };
+
+// ✅ CORREGIDO: Exportación nombrada para autorización de roles
+export const autorizarRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(403).json({ error: 'Usuario no autenticado' });
+    }
+
+    if (!roles.includes(req.user.rol)) {
+      console.log(`❌ Acceso denegado. Rol ${req.user.rol} no autorizado. Requerido: ${roles}`);
+      return res.status(403).json({ 
+        error: 'Acceso denegado: permisos insuficientes' 
+      });
+    }
+
+    console.log(`✅ Acceso autorizado para rol: ${req.user.rol}`);
+    next();
+  };
+};
+
+// ✅ OPCIÓN ALTERNATIVA: Si prefieres exportación por defecto
+// export default { verificarToken, autorizarRoles };

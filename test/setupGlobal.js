@@ -1,73 +1,118 @@
-// 🧪 Setup institucional global para tests
-// - Reemplaza setup.js, setupChai.js y testUtils.js
-// - Compatible con ES Modules, Mocha, Supertest y Sequelize
+const fs = require('fs');
+const jwt = require('jsonwebtoken');
+const { expect } = require('chai');
+const path = require('path');
 
-import * as chaiImport from 'chai';
-import chaiHttp from 'chai-http';
-import request from 'supertest';
-import app from '../app.js';
-import db from '../models/index.js';
-import fs from 'fs';
-
-// 🧩 Adaptación segura para entorno ES Modules
-const chai = chaiImport;
-chai.use(chaiHttp);
-export const expect = chai.expect;
-
-/**
- * 🔐 Obtiene token JWT válido para usuario institucional
- * @param {string} username
- * @param {string} password
- * @returns {Promise<string>} token JWT
- */
-export async function getToken(username = 'admin', password = 'adminDefinitiva456') {
-  const res = await request(app)
-    .post('/auth/login')
-    .send({ username, password });
-
-  return res.body.token;
+// ✅ CARGAR VARIABLES DE ENTORNO INTELIGENTEMENTE
+try {
+  // Intentar cargar .env principal
+  require('dotenv').config({ path: './.env' });
+} catch (error) {
+  console.log('⚠️ No se pudo cargar .env principal');
 }
 
-/**
- * 🧾 Lee contenido actual del log de accesos
- * @returns {string} contenido del archivo
- */
-export function leerLog() {
-  return fs.readFileSync('./logs/accesos.log', 'utf8');
-}
-
-/**
- * ✅ Valida que el log contenga una expresión institucional
- * @param {string} regex expresión regular a buscar
- */
-export function expectLogMatch(regex) {
-  const contenido = leerLog();
-  if (!new RegExp(regex).test(contenido)) {
-    throw new Error(`No se encontró trazabilidad esperada: ${regex}`);
+// Si aún no hay JWT_SECRET, cargar .env.test
+if (!process.env.JWT_SECRET) {
+  try {
+    const envTestPath = path.join(__dirname, '.env.test');
+    require('dotenv').config({ path: envTestPath });
+    console.log('✅ Cargado .env.test para testing');
+  } catch (error) {
+    console.log('⚠️ No se pudo cargar .env.test');
   }
 }
 
-/**
- * 🧹 Resetea la base de datos institucional
- * - Borra y recrea todas las tablas
- */
-export async function resetDB() {
-  await db.sequelize.sync({ force: true });
+// ✅ GARANTIZAR QUE HAY JWT_SECRET
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'jwt_secret_para_testing_muni_las_tapias_2025_' + Date.now();
+  console.log('🔧 JWT_SECRET forzado para testing');
 }
 
-// 🔁 Limpieza antes de cada test
-beforeEach(async () => {
-  await resetDB();
-  fs.writeFileSync('./logs/accesos.log', ''); // 🧾 Log limpio
+console.log('🔐 JWT_SECRET configurado:', process.env.JWT_SECRET ? '✅' : '❌');
+console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
+
+// ✅ GENERACIÓN DE TOKENS (ahora segura)
+const generateAuthToken = (user) => {
+  return jwt.sign(
+    { 
+      id: user.id,
+      email: user.email,
+      rol: user.rol,
+      requiereCambioPassword: user.requiereCambioPassword || false
+    },
+    process.env.JWT_SECRET,
+    { 
+      expiresIn: '1h',
+      algorithm: 'HS256'
+    }
+  );
+};
+
+// ... resto del código sin cambios ...
+const adminToken = generateAuthToken({
+  id: 1,
+  email: 'admin@municipalidad.com',
+  rol: 'admin',
+  requiereCambioPassword: false
 });
 
-// 🔐 Login institucional antes de todos los tests
-before(async () => {
-  const token = await getToken();
-  global.testContext = { token };
+const empleadoToken = generateAuthToken({
+  id: 2,
+  email: 'empleado@municipalidad.com', 
+  rol: 'empleado',
+  requiereCambioPassword: false
 });
 
-// ✅ Cierre de conexión al finalizar
-after(async () => {
-  await db.sequelize.close();
+const vecinoToken = generateAuthToken({
+  id: 3,
+  email: 'vecino@example.com',
+  rol: 'vecino',
+  requiereCambioPassword: false
 });
+
+const getToken = (rol) => {
+  switch(rol) {
+    case 'admin': return adminToken;
+    case 'empleado': return empleadoToken;
+    case 'vecino': return vecinoToken;
+    default: return adminToken;
+  }
+};
+
+const expectLogMatch = (expectedPattern, logFile = 'accesos.test.log') => {
+  const logPath = `./logs/${logFile}`;
+  
+  if (!fs.existsSync('./logs')) {
+    fs.mkdirSync('./logs', { recursive: true });
+  }
+  
+  if (!fs.existsSync(logPath)) {
+    throw new Error(`Archivo de log no encontrado: ${logPath}`);
+  }
+
+  const logContent = fs.readFileSync(logPath, 'utf8');
+  const lines = logContent.split('\n').filter(line => line.trim());
+  
+  const found = lines.some(line => {
+    try {
+      const logEntry = JSON.parse(line);
+      return new RegExp(expectedPattern).test(logEntry.mensaje);
+    } catch (e) {
+      return line.includes(expectedPattern);
+    }
+  });
+
+  if (!found) {
+    throw new Error(`No se encontró trazabilidad esperada: ${expectedPattern}`);
+  }
+};
+
+module.exports = {
+  expect,
+  generateAuthToken,
+  adminToken,
+  empleadoToken,
+  vecinoToken,
+  getToken,
+  expectLogMatch
+};

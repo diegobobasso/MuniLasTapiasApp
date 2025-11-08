@@ -2,7 +2,7 @@
   "name": "munilastapiasapp",
   "version": "1.0.0",
   "description": "Prueba para la Municipalidad",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "vite",
     "backend": "node server/server.js",
@@ -19,6 +19,7 @@
   "homepage": "https://github.com/diegobobasso/MuniLasTapiasApp#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "bootstrap": "^5.3.8",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
