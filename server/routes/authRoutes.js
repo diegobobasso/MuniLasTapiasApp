@@ -1,13 +1,16 @@
-// routes/authRoutes.js
 import express from 'express';
-import { loginEmpleado } from '../controllers/authController.js';
+import { login, cambiarPasswordInicial } from '../controllers/authController.js';
 
 const router = express.Router();
 
 /**
- * 🔐 Login institucional de empleados
- * POST /auth/login
+ * 🔐 Login institucional
  */
-router.post('/login', loginEmpleado);
+router.post('/login', login);
+
+/**
+ * 🔐 Cambio de contraseña inicial
+ */
+router.post('/cambiar-password-inicial', cambiarPasswordInicial);
 
 export default router;

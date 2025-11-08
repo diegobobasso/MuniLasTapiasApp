@@ -2,7 +2,8 @@ import jwt from 'jsonwebtoken';
 
 /**
  * 🔐 Middleware institucional para verificar token JWT
- * - Valida formato "Bearer <token>"
+ * - Permite acceso libre a /admin/bootstrap si no hay token
+ * - Valida formato "Bearer <token>" en el resto
  * - Decodifica y verifica firma con JWT_SECRET
  * - Guarda datos del empleado en req.empleado
  * - Rechaza accesos no autenticados o tokens inválidos
@@ -10,7 +11,12 @@ import jwt from 'jsonwebtoken';
 export const verificarToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  // Verifica que el header exista y tenga formato correcto
+  // 🔓 Excepción: permitir acceso libre a /admin/bootstrap
+  if (req.method === 'POST' && req.path === '/bootstrap' && req.baseUrl === '/admin') {
+    return next();
+  }
+
+  // 🔐 Verifica que el header exista y tenga formato correcto
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     console.warn(`[${new Date().toISOString()}] Token no proporcionado`);
     return res.status(401).json({ error: 'Token no proporcionado' });

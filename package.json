@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "backend": "node server/server.js",
-    "start": "concurrently \"npm run dev\" \"npm run backend\""
+    "start": "concurrently \"npm run dev\" \"npm run backend\"",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -17,15 +18,27 @@
   },
   "homepage": "https://github.com/diegobobasso/MuniLasTapiasApp#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.8",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
     "mysql2": "^3.15.3",
     "nodemailer": "^7.0.10",
+    "sequelize": "^6.37.7",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@jest/globals": "^30.2.0",
+    "chai": "^6.2.0",
+    "chai-http": "^5.1.2",
     "concurrently": "^8.2.0",
+    "jest": "^30.2.0",
+    "jest-esm-transformer": "^1.0.0",
+    "mocha": "^11.7.5",
+    "supertest": "^7.1.4",
     "vite": "^7.1.12",
     "vue": "^3.5.22"
   }

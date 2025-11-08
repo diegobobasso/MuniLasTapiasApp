@@ -5,18 +5,45 @@ import {
   getVecinoById,
   updateVecino,
   deleteVecino,
-  restaurarClaveVecino
+  restaurarClaveVecino,
+  cambiarClavePropiaVecino
 } from '../controllers/vecinosController.js';
-import { verificarToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Rutas protegidas por token
-router.get('/', verificarToken, getVecinos);
-router.get('/:id', verificarToken, getVecinoById);
-router.post('/', verificarToken, createVecino);
-router.put('/:id', verificarToken, updateVecino);
-router.delete('/:id', verificarToken, deleteVecino);
-router.put('/restaurar-clave/:id', verificarToken, restaurarClaveVecino);
+/**
+ * 📄 Lista vecinos registrados
+ */
+router.get('/', getVecinos);
+
+/**
+ * 📄 Obtiene vecino por ID
+ */
+router.get('/:id', getVecinoById);
+
+/**
+ * ➕ Crea nuevo vecino (solo empleados)
+ */
+router.post('/', createVecino);
+
+/**
+ * ✏️ Actualiza datos de vecino
+ */
+router.put('/:id', updateVecino);
+
+/**
+ * 🗑️ Elimina vecino
+ */
+router.delete('/:id', deleteVecino);
+
+/**
+ * 🔄 Restaura contraseña de vecino (solo empleados)
+ */
+router.put('/restaurar-clave/:id', restaurarClaveVecino);
+
+/**
+ * 🔐 Cambia su propia contraseña (autenticado)
+ */
+router.put('/cambiar-clave', cambiarClavePropiaVecino);
 
 export default router;

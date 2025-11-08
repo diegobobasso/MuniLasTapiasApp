@@ -1,16 +1,16 @@
-// controllers/empleadosController.js
 import db from '../models/db.js';
 import bcrypt from 'bcrypt';
+import { logAcceso } from '../utils/logger.js';
 
 /**
  * 📄 Listar empleados activos
- * Solo muestra empleados con estado activo para panel institucional
  */
 export const getEmpleados = (req, res) => {
   db.query(
-    'SELECT id, nombre, email, rol, fecha_alta FROM empleados WHERE activo = TRUE',
+    'SELECT id, nombre, email, rol, creado_en FROM empleados WHERE activo = TRUE',
     (err, results) => {
       if (err) return res.status(500).json({ error: err.message });
+      logAcceso(`${req.empleado.rol} accedió a listado de empleados`);
       res.json(results);
     }
   );
@@ -18,12 +18,10 @@ export const getEmpleados = (req, res) => {
 
 /**
  * ➕ Crear empleado (solo admin)
- * Valida rol, hashea contraseña y registra alta institucional
  */
 export const createEmpleado = async (req, res) => {
   const { nombre, email, password, rol } = req.body;
 
-  // Validación de rol institucional
   if (req.empleado.rol !== 'admin') {
     return res.status(403).json({ error: 'Acceso restringido al rol administrador' });
   }
@@ -35,12 +33,12 @@ export const createEmpleado = async (req, res) => {
       email,
       password_hash,
       rol,
-      fecha_alta: new Date(),
       activo: true
     };
 
     db.query('INSERT INTO empleados SET ?', nuevo, (err, result) => {
       if (err) return res.status(500).json({ error: err.message });
+      logAcceso(`admin creó empleado: ${nombre}`);
       res.status(201).json({ id: result.insertId, ...nuevo });
     });
   } catch (err) {
@@ -50,7 +48,6 @@ export const createEmpleado = async (req, res) => {
 
 /**
  * 📴 Baja lógica de empleado
- * Desactiva el acceso sin eliminar el registro
  */
 export const desactivarEmpleado = (req, res) => {
   db.query(
@@ -58,6 +55,7 @@ export const desactivarEmpleado = (req, res) => {
     [req.params.id],
     (err) => {
       if (err) return res.status(500).json({ error: err.message });
+      logAcceso(`admin desactivó empleado ID ${req.params.id}`);
       res.json({ mensaje: 'Empleado desactivado' });
     }
   );
@@ -65,13 +63,11 @@ export const desactivarEmpleado = (req, res) => {
 
 /**
  * 🔄 Restaurar contraseña institucional (solo admin)
- * Reestablece la contraseña de un empleado a una nueva segura
  */
 export const restaurarClaveEmpleado = async (req, res) => {
   const { id } = req.params;
   const { nuevaClave } = req.body;
 
-  // Validación de rol institucional
   if (req.empleado.rol !== 'admin') {
     return res.status(403).json({ error: 'Solo el administrador puede restaurar claves de empleados' });
   }
@@ -83,7 +79,39 @@ export const restaurarClaveEmpleado = async (req, res) => {
       [password_hash, id],
       (err) => {
         if (err) return res.status(500).json({ error: err.message });
+        logAcceso(`admin restauró contraseña de empleado ID ${id}`);
         res.json({ mensaje: 'Contraseña restaurada correctamente' });
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ error: 'Error al procesar la nueva contraseña' });
+  }
+};
+
+/**
+ * 🔐 Cambiar contraseña propia (autenticado)
+ */
+export const cambiarClavePropiaEmpleado = async (req, res) => {
+  const { nuevaClave } = req.body;
+  const empleado = req.empleado;
+
+  if (!empleado || !empleado.id) {
+    return res.status(401).json({ error: 'Empleado no autenticado' });
+  }
+
+  if (!nuevaClave || nuevaClave.length < 6) {
+    return res.status(400).json({ error: 'La nueva clave debe tener al menos 6 caracteres' });
+  }
+
+  try {
+    const password_hash = await bcrypt.hash(nuevaClave, 10);
+    db.query(
+      'UPDATE empleados SET password_hash = ?, intentos_login = 0 WHERE id = ?',
+      [password_hash, empleado.id],
+      (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        logAcceso(`empleado ID ${empleado.id} cambió su propia contraseña`);
+        res.json({ mensaje: 'Contraseña actualizada correctamente' });
       }
     );
   } catch (err) {

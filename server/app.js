@@ -1,15 +1,12 @@
-// app.js
 import express from 'express';
 import cors from 'cors';
-
 import { verificarToken } from './middleware/authMiddleware.js';
 
-// 🔐 Rutas públicas
+// 🔐 Rutas públicas (sin token)
 import authRoutes from './routes/authRoutes.js';
 import authVecinoRouter from './routes/authVecino.js';
-import adminBootstrapRouter from './routes/adminBootstrap.js';
 
-// 📦 Rutas protegidas
+// 📦 Rutas protegidas (requieren token válido)
 import articulosRouter from './routes/articulos.js';
 import sugerenciasRouter from './routes/sugerencias.js';
 import vecinosRouter from './routes/vecinos.js';
@@ -24,26 +21,29 @@ import consultasServiciosRouter from './routes/consultasServicios.js';
 import empleadosRoutes from './routes/empleados.js';
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-// 🔐 Autenticación
-app.use('/auth', authRoutes);
-app.use('/auth-vecino', authVecinoRouter);
-app.use('/admin', adminBootstrapRouter);
+// 🌐 Middleware global
+app.use(cors()); // Permite CORS para frontend externo
+app.use(express.json()); // Habilita JSON en body de requests
 
-// 📦 Rutas protegidas por token
-app.use('/articulos', verificarToken, articulosRouter);
-app.use('/sugerencias', verificarToken, sugerenciasRouter);
-app.use('/vecinos', verificarToken, vecinosRouter);
-app.use('/terrenos', verificarToken, terrenosRouter);
-app.use('/inspecciones', verificarToken, inspeccionesRouter);
-app.use('/archivos', verificarToken, archivosRouter);
-app.use('/tramites', verificarToken, tramitesRouter);
-app.use('/denuncias', verificarToken, denunciasRouter);
-app.use('/eventos', verificarToken, eventosRouter);
-app.use('/conexiones', verificarToken, conexionesRouter);
-app.use('/consultas-servicios', verificarToken, consultasServiciosRouter);
-app.use('/empleados', verificarToken, empleadosRoutes);
+// 🔐 Rutas de autenticación públicas
+app.use('/api/auth', authRoutes);             // Admins y empleados
+app.use('/api/auth-vecino', authVecinoRouter); // Vecinos
 
+// 📦 Rutas protegidas por token institucional
+app.use('/api/articulos', verificarToken, articulosRouter);
+app.use('/api/sugerencias', verificarToken, sugerenciasRouter);
+app.use('/api/vecinos', verificarToken, vecinosRouter);
+app.use('/api/terrenos', verificarToken, terrenosRouter);
+app.use('/api/inspecciones', verificarToken, inspeccionesRouter);
+app.use('/api/archivos', verificarToken, archivosRouter);
+app.use('/api/tramites', verificarToken, tramitesRouter);
+app.use('/api/denuncias', verificarToken, denunciasRouter);
+app.use('/api/eventos', verificarToken, eventosRouter);
+app.use('/api/conexiones', verificarToken, conexionesRouter);
+app.use('/api/consultas-servicios', verificarToken, consultasServiciosRouter);
+app.use('/api/empleados', verificarToken, empleadosRoutes);
+
+// 📦 Exportación institucional
 export default app;
+
