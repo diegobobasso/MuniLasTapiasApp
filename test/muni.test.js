@@ -1,5 +1,5 @@
-// 🏛️ Tests institucionales completos
-// - Ajustados para prefijo /api
+/// 🏛️ Tests institucionales completos
+// - Ajustados para nueva validación de authRoutes.js
 // - Compatible con Mocha, Supertest y setupGlobal.js (CommonJS)
 
 const { expect, getToken, expectLogMatch } = require('./setupGlobal.js');
@@ -51,15 +51,19 @@ describe('🏛️ Tests institucionales completos', function() {
         .set('Authorization', token)
         .send({
           nombre: 'Diego',
+          apellido: 'Bobasso',
           email: 'diego@muni.gob.ar',
           password: 'segura123',
-          rol: 'empleado'
+          rol: 'empleado',
+          dni: '12345678',
+          domicilio: 'Calle Principal 123',
+          telefono: '3511234567'
         });
       
       // ✅ CORREGIDO: Nueva estructura de respuesta
       if (res.status === 201) {
         expect(res.body.success).to.be.true;
-        expect(res.body.data.empleado.nombre).to.equal('Diego'); // ← LÍNEA CORREGIDA
+        expect(res.body.data.empleado.nombre).to.equal('Diego');
       } else {
         expect(res.status).to.not.equal(403);
       }
@@ -111,7 +115,7 @@ describe('🏛️ Tests institucionales completos', function() {
       // ✅ CORREGIDO: Nueva estructura de respuesta
       if (res.status === 201) {
         expect(res.body.success).to.be.true;
-        expect(res.body.data.vecino.nombre).to.equal('Juan'); // ← LÍNEA CORREGIDA
+        expect(res.body.data.vecino.nombre).to.equal('Juan');
       } else {
         expect(res.status).to.not.equal(403);
       }
@@ -143,36 +147,62 @@ describe('🏛️ Tests institucionales completos', function() {
   });
 
   // ----------------------------
-  // 🛡️ Flujo superadmin inicial
+  // 🛡️ Flujo superadmin inicial - ACTUALIZADO
   // ----------------------------
   describe('🛡️ Flujo institucional de superadmin inicial', function() {
-    const username = 'admin';
-    const passwordTemporal = 'admin123';
-    const nuevaPassword = 'adminDefinitiva456';
+    const email = 'admin@municipalidad.com';
+    const passwordTemporal = 'Admin123!'; // ✅ Password que activa cambio requerido
+    const nuevaPassword = 'AdminDefinitiva456!';
 
     it('🚫 bloquea login si requiere cambio de contraseña', async function() {
       const res = await request(app)
         .post('/api/auth/login')
-        .send({ username, password: passwordTemporal });
+        .send({ 
+          email: email, 
+          password: passwordTemporal 
+        });
       
-      expect([403, 404, 401]).to.include(res.status);
+      // ✅ ACTUALIZADO: Nueva validación devuelve 400 o 403
+      expect([403, 400]).to.include(res.status);
+      
+      // Si es 403, verificar que es por cambio de password requerido
+      if (res.status === 403) {
+        expect(res.body.error).to.equal('CAMBIO_PASSWORD_REQUERIDO');
+        expect(res.body.data.requiereCambioPassword).to.be.true;
+      }
     });
 
     it('✅ permite cambiar la contraseña inicial', async function() {
       const res = await request(app)
         .post('/api/auth/cambiar-password-inicial')
-        .send({ username, nuevaPassword });
+        .send({ 
+          email: email, 
+          nuevaPassword: nuevaPassword 
+        });
       
-      expect([200, 404, 400]).to.include(res.status);
+      // ✅ ACTUALIZADO: Nueva validación más estricta
+      expect([200, 400]).to.include(res.status);
+      
+      if (res.status === 200) {
+        expect(res.body.data.requiereCambioPassword).to.be.false;
+      }
     });
 
     it('✅ permite login después del cambio', async function() {
       const res = await request(app)
         .post('/api/auth/login')
-        .send({ username, password: nuevaPassword });
+        .send({ 
+          email: email, 
+          password: nuevaPassword 
+        });
       
+      // ✅ Si el login es exitoso, debería tener token
       if (res.status === 200) {
-        expect(res.body).to.have.property('token');
+        expect(res.body.data).to.have.property('token');
+        expect(res.body.data.usuario.email).to.equal(email);
+      } else {
+        // Si falla, al menos verificar que no es error de validación
+        expect(res.status).to.not.equal(400);
       }
     });
 

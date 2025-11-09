@@ -92,13 +92,14 @@ app.get('/', (req, res) => {
 // ✅ USAR EL MANEJADOR DE ERRORES CENTRALIZADO (DEBE SER EL ÚLTIMO MIDDLEWARE)
 app.use(errorHandler);
 
-// ✅ INICIAR SERVIDOR
-if (process.env.NODE_ENV !== 'test') {
+
+
+// INICIAR SERVIDOR SOLO SI NO ESTÁ EN TEST Y NO ES IMPORTADO
+if (process.env.NODE_ENV !== 'test' && require.main === module) {
   app.listen(PORT, () => {
     console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
     console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🛡️ Sistema de errores centralizado: ACTIVO`);
   });
 }
 

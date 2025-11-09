@@ -1,15 +1,64 @@
+/**
+ * 👥 CONTROLADOR DE EMPLEADOS - VERSIÓN DATOS DEMO (ESTABLE)
+ * 
+ * Maneja todas las operaciones CRUD para empleados municipales
+ * utilizando datos en memoria para desarrollo rápido.
+ * 
+ * Endpoints disponibles:
+ * - GET    /api/empleados           - Listar todos los empleados
+ * - GET    /api/empleados/:id       - Obtener empleado específico
+ * - POST   /api/empleados           - Crear nuevo empleado
+ * - PUT    /api/empleados/:id       - Actualizar empleado
+ * - PUT    /api/empleados/:id/restaurar-clave - Restaurar contraseña
+ * 
+ * Seguridad implementada:
+ * - Autenticación JWT requerida en todas las rutas
+ * - Autorización por roles (solo admin para crear/actualizar)
+ * - Validación robusta de datos de entrada
+ */
+
 const express = require('express');
 const router = express.Router();
 const { verificarToken, autorizarRoles } = require('../middleware/authMiddleware');
 const { asyncHandler, ValidationError, NotFoundError } = require('../middleware/errorHandler');
 
-// ✅ FUNCIÓN DE VALIDACIÓN CENTRALIZADA (MEJORADA)
+// 📊 DATOS DEMO EN MEMORIA (TEMPORAL)
+let empleadosDemo = [
+  { 
+    id: 1, 
+    nombre: 'Admin', 
+    apellido: 'Sistema',
+    email: 'admin@municipalidad.com', 
+    rol: 'admin', 
+    activo: true,
+    fechaCreacion: '2024-01-01',
+    fechaActualizacion: '2024-01-01'
+  },
+  { 
+    id: 2, 
+    nombre: 'Empleado', 
+    apellido: 'Ejemplo',
+    email: 'empleado@municipalidad.com', 
+    rol: 'empleado', 
+    activo: true,
+    fechaCreacion: '2024-01-01',
+    fechaActualizacion: '2024-01-01'
+  }
+];
+
+/**
+ * ✅ MIDDLEWARE DE VALIDACIÓN PARA DATOS DE EMPLEADO
+ */
 const validarEmpleado = (req, res, next) => {
-  const { nombre, email, password, rol } = req.body;
+  const { nombre, apellido, email, password, rol } = req.body;
   const errores = [];
 
   if (!nombre || typeof nombre !== 'string' || nombre.trim().length < 2) {
     errores.push('El nombre debe tener al menos 2 caracteres');
+  }
+
+  if (!apellido || typeof apellido !== 'string' || apellido.trim().length < 2) {
+    errores.push('El apellido debe tener al menos 2 caracteres');
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,12 +80,15 @@ const validarEmpleado = (req, res, next) => {
   }
 
   req.body.nombre = nombre.trim();
+  req.body.apellido = apellido.trim();
   req.body.email = email.toLowerCase().trim();
   
   next();
 };
 
-// ✅ VALIDACIÓN PARA ACTUALIZACIÓN DE CONTRASEÑA
+/**
+ * ✅ MIDDLEWARE DE VALIDACIÓN PARA CAMBIO DE CONTRASEÑA
+ */
 const validarCambioPassword = (req, res, next) => {
   const { nuevaClave } = req.body;
 
@@ -47,17 +99,13 @@ const validarCambioPassword = (req, res, next) => {
   next();
 };
 
-// ✅ SIMULACIÓN DE BASE DE DATOS (para demostración)
-const empleadosDemo = [
-  { id: 1, nombre: 'Admin', email: 'admin@municipalidad.com', rol: 'admin', activo: true },
-  { id: 2, nombre: 'Empleado', email: 'empleado@municipalidad.com', rol: 'empleado', activo: true }
-];
-
-// ✅ RUTA GET /api/empleados - CON asyncHandler
+/**
+ * 📋 ENDPOINT: LISTAR TODOS LOS EMPLEADOS
+ */
 router.get('/', verificarToken, asyncHandler(async (req, res) => {
   console.log('✅ GET /api/empleados - Usuario:', req.user.email);
   
-  // Simular pequeña demora de BD
+  // Simular pequeña demora
   await new Promise(resolve => setTimeout(resolve, 50));
   
   res.json({ 
@@ -73,7 +121,9 @@ router.get('/', verificarToken, asyncHandler(async (req, res) => {
   });
 }));
 
-// ✅ RUTA GET /api/empleados/:id - CON MANEJO DE ERRORES MEJORADO
+/**
+ * 👤 ENDPOINT: OBTENER EMPLEADO ESPECÍFICO
+ */
 router.get('/:id', verificarToken, asyncHandler(async (req, res) => {
   const empleadoId = parseInt(req.params.id);
   console.log(`✅ GET /api/empleados/${empleadoId} - Usuario:`, req.user.email);
@@ -82,7 +132,6 @@ router.get('/:id', verificarToken, asyncHandler(async (req, res) => {
     throw new ValidationError('ID de empleado inválido');
   }
 
-  // Simular búsqueda en BD
   await new Promise(resolve => setTimeout(resolve, 30));
   const empleado = empleadosDemo.find(e => e.id === empleadoId);
 
@@ -99,25 +148,24 @@ router.get('/:id', verificarToken, asyncHandler(async (req, res) => {
   });
 }));
 
-// ✅ RUTA POST /api/empleados - OPTIMIZADA CON asyncHandler
+/**
+ * ➕ ENDPOINT: CREAR NUEVO EMPLEADO
+ */
 router.post('/', verificarToken, autorizarRoles('admin'), validarEmpleado, asyncHandler(async (req, res) => {
   console.log('✅ POST /api/empleados - Datos validados:', req.body);
   
-  // Simular guardado en BD
   await new Promise(resolve => setTimeout(resolve, 100));
   
   const nuevoEmpleado = {
     id: Date.now(),
     ...req.body,
     fechaCreacion: new Date().toISOString(),
-    activo: true,
-    creadoPor: req.user.email
+    fechaActualizacion: new Date().toISOString(),
+    activo: true
   };
 
   // Remover password del response por seguridad
   const { password, ...empleadoSinPassword } = nuevoEmpleado;
-
-  // Agregar a "BD" simulada
   empleadosDemo.push(empleadoSinPassword);
 
   res.status(201).json({
@@ -132,7 +180,9 @@ router.post('/', verificarToken, autorizarRoles('admin'), validarEmpleado, async
   });
 }));
 
-// ✅ RUTA PUT /api/empleados/:id/restaurar-clave - MEJORADA
+/**
+ * 🔄 ENDPOINT: RESTAURAR CONTRASEÑA DE EMPLEADO
+ */
 router.put('/:id/restaurar-clave', verificarToken, autorizarRoles('admin'), validarCambioPassword, asyncHandler(async (req, res) => {
   const empleadoId = parseInt(req.params.id);
   console.log('✅ PUT /api/empleados/restaurar-clave - ID:', empleadoId);
@@ -141,7 +191,6 @@ router.put('/:id/restaurar-clave', verificarToken, autorizarRoles('admin'), vali
     throw new ValidationError('ID de empleado inválido');
   }
 
-  // Simular verificación en BD
   await new Promise(resolve => setTimeout(resolve, 50));
   const empleado = empleadosDemo.find(e => e.id === empleadoId);
 
@@ -160,7 +209,9 @@ router.put('/:id/restaurar-clave', verificarToken, autorizarRoles('admin'), vali
   });
 }));
 
-// ✅ RUTA PUT /api/empleados/:id - NUEVA CON MANEJO DE ERRORES
+/**
+ * ✏️ ENDPOINT: ACTUALIZAR EMPLEADO
+ */
 router.put('/:id', verificarToken, autorizarRoles('admin'), validarEmpleado, asyncHandler(async (req, res) => {
   const empleadoId = parseInt(req.params.id);
   console.log(`✅ PUT /api/empleados/${empleadoId} - Datos:`, req.body);
@@ -169,7 +220,6 @@ router.put('/:id', verificarToken, autorizarRoles('admin'), validarEmpleado, asy
     throw new ValidationError('ID de empleado inválido');
   }
 
-  // Simular actualización en BD
   await new Promise(resolve => setTimeout(resolve, 80));
   const empleadoIndex = empleadosDemo.findIndex(e => e.id === empleadoId);
 
@@ -177,12 +227,13 @@ router.put('/:id', verificarToken, autorizarRoles('admin'), validarEmpleado, asy
     throw new NotFoundError(`Empleado con ID ${empleadoId} no encontrado`);
   }
 
-  // Actualizar empleado (en realidad simulado)
   const empleadoActualizado = {
     ...empleadosDemo[empleadoIndex],
     ...req.body,
     fechaActualizacion: new Date().toISOString()
   };
+
+  empleadosDemo[empleadoIndex] = empleadoActualizado;
 
   res.json({
     success: true,
