@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken');
 
-// ✅ MIDDLEWARE DE AUTENTICACIÓN - COMMONJS
+/**
+ * 🔐 Middleware de autenticación institucional
+ * - Verifica token JWT
+ * - Decodifica y valida estructura
+ * - Protege rutas con req.user
+ */
 const verificarToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -20,18 +25,18 @@ const verificarToken = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     if (!decoded.id || !decoded.rol) {
       console.log('❌ Token con estructura inválida:', decoded);
       return res.status(403).json({ error: 'Token con estructura inválida' });
     }
-    
+
     req.user = decoded;
     console.log(`✅ Token válido para usuario: ${decoded.email}, rol: ${decoded.rol}`);
     next();
   } catch (error) {
     console.error('❌ Error verificando token:', error.message);
-    
+
     if (error.name === 'JsonWebTokenError') {
       return res.status(403).json({ error: 'Token inválido: jwt malformed' });
     } else if (error.name === 'TokenExpiredError') {
@@ -42,7 +47,10 @@ const verificarToken = (req, res, next) => {
   }
 };
 
-// ✅ MIDDLEWARE DE AUTORIZACIÓN
+/**
+ * 🔐 Middleware de autorización por rol
+ * - Protege rutas según roles permitidos
+ */
 const autorizarRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -51,9 +59,7 @@ const autorizarRoles = (...roles) => {
 
     if (!roles.includes(req.user.rol)) {
       console.log(`❌ Acceso denegado. Rol ${req.user.rol} no autorizado. Requerido: ${roles}`);
-      return res.status(403).json({ 
-        error: 'Acceso denegado: permisos insuficientes' 
-      });
+      return res.status(403).json({ error: 'Acceso denegado: permisos insuficientes' });
     }
 
     console.log(`✅ Acceso autorizado para rol: ${req.user.rol}`);
@@ -61,7 +67,6 @@ const autorizarRoles = (...roles) => {
   };
 };
 
-// ✅ EXPORTAR EN COMMONJS
 module.exports = {
   verificarToken,
   autorizarRoles

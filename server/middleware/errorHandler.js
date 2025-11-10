@@ -1,7 +1,9 @@
-// 🛡️ Middleware de manejo centralizado de errores
-// - Captura todos los errores de forma consistente
-// - Logs estructurados para debugging
-// - Respuestas de error normalizadas
+/**
+ * 🛡️ Middleware de manejo centralizado de errores
+ * - Captura todos los errores de forma consistente
+ * - Logs estructurados para debugging
+ * - Respuestas de error normalizadas
+ */
 
 const errorHandler = (error, req, res, next) => {
   console.error('💥 ERROR HANDLER - Capturando error:', {
@@ -14,7 +16,6 @@ const errorHandler = (error, req, res, next) => {
     stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
   });
 
-  // ✅ ERRORES DE VALIDACIÓN JWT
   if (error.name === 'JsonWebTokenError') {
     return res.status(403).json({
       success: false,
@@ -33,7 +34,6 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
-  // ✅ ERRORES DE VALIDACIÓN DE DATOS
   if (error.name === 'ValidationError') {
     return res.status(400).json({
       success: false,
@@ -44,7 +44,6 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
-  // ✅ ERRORES DE BASE DE DATOS
   if (error.code === 'ER_DUP_ENTRY') {
     return res.status(409).json({
       success: false,
@@ -63,7 +62,6 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
-  // ✅ ERRORES DE AUTENTICACIÓN/AUTORIZACIÓN
   if (error.name === 'UnauthorizedError') {
     return res.status(401).json({
       success: false,
@@ -82,7 +80,6 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
-  // ✅ ERROR 404 - RECURSO NO ENCONTRADO
   if (error.name === 'NotFoundError') {
     return res.status(404).json({
       success: false,
@@ -92,7 +89,6 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
-  // ✅ ERROR DE SYNTAX EN JSON
   if (error.type === 'entity.parse.failed') {
     return res.status(400).json({
       success: false,
@@ -102,9 +98,8 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
-  // ✅ ERROR GENERAL DEL SERVIDOR
   console.error('❌ ERROR NO MANEJADO:', error);
-  
+
   res.status(500).json({
     success: false,
     message: 'Error interno del servidor',
@@ -115,7 +110,7 @@ const errorHandler = (error, req, res, next) => {
   });
 };
 
-// ✅ CLASES DE ERROR PERSONALIZADAS
+// ✅ Clases de error personalizadas
 class ValidationError extends Error {
   constructor(message, errors = []) {
     super(message);
@@ -149,7 +144,7 @@ class ForbiddenError extends Error {
   }
 }
 
-// ✅ FUNCIÓN DE MANEJO DE ERRORES ASÍNCRONOS
+// ✅ Wrapper para funciones async
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };

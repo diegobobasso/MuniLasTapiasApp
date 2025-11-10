@@ -1,248 +1,144 @@
 /**
- * 👥 CONTROLADOR DE EMPLEADOS - VERSIÓN DATOS DEMO (ESTABLE)
- * 
- * Maneja todas las operaciones CRUD para empleados municipales
- * utilizando datos en memoria para desarrollo rápido.
- * 
- * Endpoints disponibles:
- * - GET    /api/empleados           - Listar todos los empleados
- * - GET    /api/empleados/:id       - Obtener empleado específico
- * - POST   /api/empleados           - Crear nuevo empleado
- * - PUT    /api/empleados/:id       - Actualizar empleado
- * - PUT    /api/empleados/:id/restaurar-clave - Restaurar contraseña
- * 
- * Seguridad implementada:
- * - Autenticación JWT requerida en todas las rutas
- * - Autorización por roles (solo admin para crear/actualizar)
- * - Validación robusta de datos de entrada
+ * 👨‍💼 CONTROLADOR INSTITUCIONAL DE EMPLEADOS
+ * - CRUD completo con base de datos real
+ * - Protección por roles
+ * - Registro en logs_acceso
  */
 
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
+
 const { verificarToken, autorizarRoles } = require('../middleware/authMiddleware');
 const { asyncHandler, ValidationError, NotFoundError } = require('../middleware/errorHandler');
+const { ejecutarConsulta } = require('../config/databaseConnection');
+const { logAcceso } = require('../utils/logger');
 
-// 📊 DATOS DEMO EN MEMORIA (TEMPORAL)
-let empleadosDemo = [
-  { 
-    id: 1, 
-    nombre: 'Admin', 
-    apellido: 'Sistema',
-    email: 'admin@municipalidad.com', 
-    rol: 'admin', 
-    activo: true,
-    fechaCreacion: '2024-01-01',
-    fechaActualizacion: '2024-01-01'
-  },
-  { 
-    id: 2, 
-    nombre: 'Empleado', 
-    apellido: 'Ejemplo',
-    email: 'empleado@municipalidad.com', 
-    rol: 'empleado', 
-    activo: true,
-    fechaCreacion: '2024-01-01',
-    fechaActualizacion: '2024-01-01'
-  }
-];
+// 📋 Obtener todos los empleados activos
+router.get('/', verificarToken, autorizarRoles('admin'), asyncHandler(async (req, res) => {
+  const empleados = await ejecutarConsulta('SELECT * FROM empleados WHERE activo = TRUE');
 
-/**
- * ✅ MIDDLEWARE DE VALIDACIÓN PARA DATOS DE EMPLEADO
- */
-const validarEmpleado = (req, res, next) => {
-  const { nombre, apellido, email, password, rol } = req.body;
-  const errores = [];
-
-  if (!nombre || typeof nombre !== 'string' || nombre.trim().length < 2) {
-    errores.push('El nombre debe tener al menos 2 caracteres');
-  }
-
-  if (!apellido || typeof apellido !== 'string' || apellido.trim().length < 2) {
-    errores.push('El apellido debe tener al menos 2 caracteres');
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || !emailRegex.test(email)) {
-    errores.push('El email debe tener un formato válido');
-  }
-
-  if (!password || password.length < 8) {
-    errores.push('La contraseña debe tener al menos 8 caracteres');
-  }
-
-  const rolesPermitidos = ['admin', 'empleado'];
-  if (!rol || !rolesPermitidos.includes(rol)) {
-    errores.push(`El rol debe ser uno de: ${rolesPermitidos.join(', ')}`);
-  }
-
-  if (errores.length > 0) {
-    throw new ValidationError('Errores de validación en empleado', errores);
-  }
-
-  req.body.nombre = nombre.trim();
-  req.body.apellido = apellido.trim();
-  req.body.email = email.toLowerCase().trim();
-  
-  next();
-};
-
-/**
- * ✅ MIDDLEWARE DE VALIDACIÓN PARA CAMBIO DE CONTRASEÑA
- */
-const validarCambioPassword = (req, res, next) => {
-  const { nuevaClave } = req.body;
-
-  if (!nuevaClave || nuevaClave.length < 8) {
-    throw new ValidationError('La nueva contraseña debe tener al menos 8 caracteres');
-  }
-
-  next();
-};
-
-/**
- * 📋 ENDPOINT: LISTAR TODOS LOS EMPLEADOS
- */
-router.get('/', verificarToken, asyncHandler(async (req, res) => {
-  console.log('✅ GET /api/empleados - Usuario:', req.user.email);
-  
-  // Simular pequeña demora
-  await new Promise(resolve => setTimeout(resolve, 50));
-  
-  res.json({ 
-    success: true,
-    message: 'Lista de empleados obtenida exitosamente',
-    data: {
-      empleados: empleadosDemo
-    },
-    metadata: {
-      total: empleadosDemo.length,
-      timestamp: new Date().toISOString()
-    }
-  });
-}));
-
-/**
- * 👤 ENDPOINT: OBTENER EMPLEADO ESPECÍFICO
- */
-router.get('/:id', verificarToken, asyncHandler(async (req, res) => {
-  const empleadoId = parseInt(req.params.id);
-  console.log(`✅ GET /api/empleados/${empleadoId} - Usuario:`, req.user.email);
-
-  if (isNaN(empleadoId)) {
-    throw new ValidationError('ID de empleado inválido');
-  }
-
-  await new Promise(resolve => setTimeout(resolve, 30));
-  const empleado = empleadosDemo.find(e => e.id === empleadoId);
-
-  if (!empleado) {
-    throw new NotFoundError(`Empleado con ID ${empleadoId} no encontrado`);
-  }
+  logAcceso('📋 Listado de empleados consultado', req.user?.email);
 
   res.json({
     success: true,
-    message: 'Empleado obtenido exitosamente',
-    data: {
-      empleado: empleado
-    }
+    message: 'Lista de empleados obtenida exitosamente',
+    data: { empleados },
+    metadata: { total: empleados.length, timestamp: new Date().toISOString() }
   });
 }));
 
-/**
- * ➕ ENDPOINT: CREAR NUEVO EMPLEADO
- */
-router.post('/', verificarToken, autorizarRoles('admin'), validarEmpleado, asyncHandler(async (req, res) => {
-  console.log('✅ POST /api/empleados - Datos validados:', req.body);
-  
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
-  const nuevoEmpleado = {
-    id: Date.now(),
-    ...req.body,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString(),
-    activo: true
-  };
+// 👤 Obtener empleado por ID
+router.get('/:id', verificarToken, autorizarRoles('admin'), asyncHandler(async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) throw new ValidationError('ID inválido');
 
-  // Remover password del response por seguridad
-  const { password, ...empleadoSinPassword } = nuevoEmpleado;
-  empleadosDemo.push(empleadoSinPassword);
+  const resultado = await ejecutarConsulta('SELECT * FROM empleados WHERE id = ? AND activo = TRUE', [id]);
+  if (resultado.length === 0) throw new NotFoundError(`Empleado con ID ${id} no encontrado`);
+
+  logAcceso(`👤 Consulta de empleado ID ${id}`, req.user?.email);
+
+  res.json({ success: true, data: { empleado: resultado[0] } });
+}));
+
+// ➕ Crear nuevo empleado
+router.post('/', verificarToken, autorizarRoles('admin'), asyncHandler(async (req, res) => {
+  const { nombre, apellido, dni, email, telefono, domicilio, password, rol, fecha_ingreso } = req.body;
+
+  if (!nombre || !apellido || !email || !password || !rol || !fecha_ingreso) {
+    throw new ValidationError('Faltan campos obligatorios');
+  }
+
+  // 🔍 Validar duplicados
+  const existentes = await ejecutarConsulta('SELECT id FROM empleados WHERE email = ? OR dni = ?', [email, dni]);
+  if (existentes.length > 0) {
+    throw new ValidationError('Ya existe un empleado con ese email o DNI');
+  }
+
+  const password_hash = await bcrypt.hash(password, 10);
+  const sql = `
+    INSERT INTO empleados (nombre, apellido, dni, email, telefono, domicilio, password_hash, rol, fecha_ingreso, activo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
+  `;
+  const params = [nombre, apellido, dni, email, telefono, domicilio, password_hash, rol, fecha_ingreso];
+  const resultado = await ejecutarConsulta(sql, params);
+
+  logAcceso(`➕ Empleado creado: ${email}`, req.user?.email);
 
   res.status(201).json({
     success: true,
     message: 'Empleado creado exitosamente',
-    data: {
-      empleado: empleadoSinPassword
-    },
-    metadata: {
-      timestamp: new Date().toISOString()
-    }
+    data: { empleado: { id: resultado.insertId, nombre, email, rol } }
   });
 }));
 
-/**
- * 🔄 ENDPOINT: RESTAURAR CONTRASEÑA DE EMPLEADO
- */
-router.put('/:id/restaurar-clave', verificarToken, autorizarRoles('admin'), validarCambioPassword, asyncHandler(async (req, res) => {
-  const empleadoId = parseInt(req.params.id);
-  console.log('✅ PUT /api/empleados/restaurar-clave - ID:', empleadoId);
-  
-  if (isNaN(empleadoId)) {
-    throw new ValidationError('ID de empleado inválido');
+// ✏️ Actualizar empleado
+router.put('/:id', verificarToken, autorizarRoles('admin'), asyncHandler(async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) throw new ValidationError('ID inválido');
+
+  const campos = req.body;
+  if (Object.keys(campos).length === 0) {
+    throw new ValidationError('No se enviaron campos para actualizar');
   }
 
-  await new Promise(resolve => setTimeout(resolve, 50));
-  const empleado = empleadosDemo.find(e => e.id === empleadoId);
+  // 🔧 Generar SET dinámico compatible con MySQL
+  const keys = Object.keys(campos);
+  const values = Object.values(campos);
+  const setClause = keys.map(k => `${k} = ?`).join(', ');
+  const sql = `UPDATE empleados SET ${setClause} WHERE id = ?`;
 
-  if (!empleado) {
-    throw new NotFoundError(`Empleado con ID ${empleadoId} no encontrado`);
-  }
+  const resultado = await ejecutarConsulta(sql, [...values, id]);
+  if (resultado.affectedRows === 0) throw new NotFoundError(`Empleado con ID ${id} no encontrado`);
 
-  res.json({
-    success: true,
-    message: 'Contraseña restaurada exitosamente',
-    data: {
-      empleadoId: empleadoId,
-      fechaActualizacion: new Date().toISOString(),
-      actualizadoPor: req.user.email
-    }
-  });
-}));
-
-/**
- * ✏️ ENDPOINT: ACTUALIZAR EMPLEADO
- */
-router.put('/:id', verificarToken, autorizarRoles('admin'), validarEmpleado, asyncHandler(async (req, res) => {
-  const empleadoId = parseInt(req.params.id);
-  console.log(`✅ PUT /api/empleados/${empleadoId} - Datos:`, req.body);
-
-  if (isNaN(empleadoId)) {
-    throw new ValidationError('ID de empleado inválido');
-  }
-
-  await new Promise(resolve => setTimeout(resolve, 80));
-  const empleadoIndex = empleadosDemo.findIndex(e => e.id === empleadoId);
-
-  if (empleadoIndex === -1) {
-    throw new NotFoundError(`Empleado con ID ${empleadoId} no encontrado`);
-  }
-
-  const empleadoActualizado = {
-    ...empleadosDemo[empleadoIndex],
-    ...req.body,
-    fechaActualizacion: new Date().toISOString()
-  };
-
-  empleadosDemo[empleadoIndex] = empleadoActualizado;
+  logAcceso(`✏️ Empleado actualizado ID ${id}`, req.user?.email);
 
   res.json({
     success: true,
     message: 'Empleado actualizado exitosamente',
-    data: {
-      empleado: empleadoActualizado,
-      fechaActualizacion: new Date().toISOString(),
-      actualizadoPor: req.user.email
-    }
+    data: { id, ...campos }
+  });
+}));
+
+// 🔄 Restaurar contraseña
+router.put('/:id/restaurar-clave', verificarToken, autorizarRoles('admin'), asyncHandler(async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { nuevaClave } = req.body;
+
+  if (!nuevaClave || nuevaClave.length < 8) {
+    throw new ValidationError('Contraseña inválida');
+  }
+
+  const password_hash = await bcrypt.hash(nuevaClave, 10);
+  const resultado = await ejecutarConsulta(
+    'UPDATE empleados SET password_hash = ?, requiere_cambio_password = FALSE WHERE id = ?',
+    [password_hash, id]
+  );
+
+  if (resultado.affectedRows === 0) throw new NotFoundError(`Empleado con ID ${id} no encontrado`);
+
+  logAcceso(`🔄 Clave restaurada para empleado ID ${id}`, req.user?.email);
+
+  res.json({
+    success: true,
+    message: 'Contraseña restaurada exitosamente',
+    data: { empleadoId: id }
+  });
+}));
+
+// ❌ Desactivar empleado (soft delete)
+router.delete('/:id', verificarToken, autorizarRoles('admin'), asyncHandler(async (req, res) => {
+  const id = parseInt(req.params.id);
+  const resultado = await ejecutarConsulta('UPDATE empleados SET activo = FALSE WHERE id = ?', [id]);
+
+  if (resultado.affectedRows === 0) throw new NotFoundError(`Empleado con ID ${id} no encontrado`);
+
+  logAcceso(`❌ Empleado desactivado ID ${id}`, req.user?.email);
+
+  res.json({
+    success: true,
+    message: 'Empleado desactivado correctamente',
+    data: { empleadoId: id }
   });
 }));
 

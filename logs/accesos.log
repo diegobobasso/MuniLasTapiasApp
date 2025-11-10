@@ -1,0 +1,23 @@
+{"timestamp":"2025-11-10T01:41:40.369Z","usuario":"sistema","mensaje":"➕ Empleado creado: admin@test.com"}
+{"timestamp":"2025-11-10T01:41:40.451Z","usuario":"sistema","mensaje":"➕ Empleado creado: juan@test.com"}
+{"timestamp":"2025-11-10T01:41:40.459Z","usuario":"sistema","mensaje":"📋 Listado de empleados consultado"}
+{"timestamp":"2025-11-10T01:41:40.554Z","usuario":"sistema","mensaje":"🔄 Clave restaurada para empleado ID 3"}
+{"timestamp":"2025-11-10T01:41:40.575Z","usuario":"sistema","mensaje":"❌ Empleado desactivado ID 3"}
+{"timestamp":"2025-11-10T01:48:33.608Z","usuario":"admin@municipalidad.com","mensaje":"➕ Empleado creado: admin@test.com"}
+{"timestamp":"2025-11-10T01:48:33.690Z","usuario":"admin@municipalidad.com","mensaje":"➕ Empleado creado: juan@test.com"}
+{"timestamp":"2025-11-10T01:48:33.698Z","usuario":"admin@municipalidad.com","mensaje":"📋 Listado de empleados consultado"}
+{"timestamp":"2025-11-10T01:48:33.716Z","usuario":"admin@municipalidad.com","mensaje":"✏️ Empleado actualizado ID 5"}
+{"timestamp":"2025-11-10T01:48:33.790Z","usuario":"admin@municipalidad.com","mensaje":"🔄 Clave restaurada para empleado ID 5"}
+{"timestamp":"2025-11-10T01:48:33.808Z","usuario":"admin@municipalidad.com","mensaje":"❌ Empleado desactivado ID 5"}
+{"timestamp":"2025-11-10T01:51:35.047Z","usuario":"admin@municipalidad.com","mensaje":"➕ Empleado creado: admin@test.com"}
+{"timestamp":"2025-11-10T01:51:35.126Z","usuario":"admin@municipalidad.com","mensaje":"➕ Empleado creado: juan@test.com"}
+{"timestamp":"2025-11-10T01:51:35.134Z","usuario":"admin@municipalidad.com","mensaje":"📋 Listado de empleados consultado"}
+{"timestamp":"2025-11-10T01:51:35.155Z","usuario":"admin@municipalidad.com","mensaje":"✏️ Empleado actualizado ID 7"}
+{"timestamp":"2025-11-10T01:51:35.231Z","usuario":"admin@municipalidad.com","mensaje":"🔄 Clave restaurada para empleado ID 7"}
+{"timestamp":"2025-11-10T01:51:35.252Z","usuario":"admin@municipalidad.com","mensaje":"❌ Empleado desactivado ID 7"}
+{"timestamp":"2025-11-10T01:55:40.137Z","usuario":"admin@municipalidad.com","mensaje":"➕ Empleado creado: admin@test.com"}
+{"timestamp":"2025-11-10T01:55:40.230Z","usuario":"admin@municipalidad.com","mensaje":"➕ Empleado creado: juan@test.com"}
+{"timestamp":"2025-11-10T01:55:40.239Z","usuario":"admin@municipalidad.com","mensaje":"📋 Listado de empleados consultado"}
+{"timestamp":"2025-11-10T01:55:40.256Z","usuario":"admin@municipalidad.com","mensaje":"✏️ Empleado actualizado ID 9"}
+{"timestamp":"2025-11-10T01:55:40.332Z","usuario":"admin@municipalidad.com","mensaje":"🔄 Clave restaurada para empleado ID 9"}
+{"timestamp":"2025-11-10T01:55:40.350Z","usuario":"admin@municipalidad.com","mensaje":"❌ Empleado desactivado ID 9"}

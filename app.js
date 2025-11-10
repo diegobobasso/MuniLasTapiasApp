@@ -1,17 +1,14 @@
-// app.js
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { logAcceso } from './server/utils/logger.js';
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const path = require('path');
+const { logAcceso } = require('./server/utils/logger');
 
 // 📦 Cargar variables de entorno
 dotenv.config();
 
-// 📁 Resolver __dirname para ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// 📁 Resolver __dirname
+const __dirname = path.resolve();
 
 // 🚀 Inicializar app
 const app = express();
@@ -24,8 +21,8 @@ app.use(express.json());
 logAcceso('🟢 Servidor institucional iniciado');
 
 // 🔐 Rutas protegidas
-import empleadosRoutes from './server/routes/empleados.js';
-import vecinosRoutes from './server/routes/vecinos.js';
+const empleadosRoutes = require('./server/routes/empleados');
+const vecinosRoutes = require('./server/routes/vecinos');
 
 app.use('/api/empleados', empleadosRoutes);
 app.use('/api/vecinos', vecinosRoutes);
@@ -41,4 +38,4 @@ app.use((req, res) => {
 });
 
 // 📦 Exportar app para test o server.js
-export default app;
+module.exports = app;

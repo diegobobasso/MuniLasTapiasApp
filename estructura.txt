@@ -1,9 +1,12 @@
 .
 |-- README.md
-|-- Tablas.md
-|-- autenticacion.md
+|-- app.js
 |-- estructura.txt
-|-- insert.sql
+|-- logs
+|   |-- accesos.log
+|   `-- test.log
+|-- models
+|   `-- index.js
 |-- package-lock.json
 |-- package.json
 |-- public
@@ -18,31 +21,16 @@
 |   `-- verificarEntorno.js
 |-- scripts.md
 |-- server
-|   |-- app.js
-|   |-- controllers
-|   |   |-- adminBootstrapController.js
-|   |   |-- archivosController.js
-|   |   |-- authController.js
-|   |   |-- authVecinoController.js
-|   |   |-- conexionesController.js
-|   |   |-- consultasServiciosController.js
-|   |   |-- denunciasController.js
-|   |   |-- empleadosController.js
-|   |   |-- eventosController.js
-|   |   |-- inspeccionesController.js
-|   |   |-- mailController.js
-|   |   |-- negociosController.js
-|   |   |-- sugerenciasController.js
-|   |   |-- terrenosController.js
-|   |   |-- tramitesController.js
-|   |   `-- vecinosController.js
+|   |-- config
+|   |   |-- database.js
+|   |   `-- databaseConnction.js
+|   |-- db
+|   |   `-- init.sql
 |   |-- middleware
 |   |   |-- authMiddleware.js
+|   |   |-- errorHandler.js
 |   |   `-- verificarToken.js
-|   |-- models
-|   |   `-- db.js
 |   |-- routes
-|   |   |-- adminBootstrap.js
 |   |   |-- archivos.js
 |   |   |-- articulos.js
 |   |   |-- authRoutes.js
@@ -54,11 +42,14 @@
 |   |   |-- eventos.js
 |   |   |-- inspecciones.js
 |   |   |-- negocios.js
+|   |   |-- noticias.js
 |   |   |-- sugerencias.js
 |   |   |-- terrenos.js
 |   |   |-- tramites.js
 |   |   `-- vecinos.js
-|   `-- server.js
+|   |-- server.js
+|   `-- utils
+|       `-- logger.js
 |-- src
 |   |-- app.vue
 |   |-- components
@@ -103,7 +94,11 @@
 |       |-- pagoPendiente.vue
 |       |-- panelInstitucional.vue
 |       `-- visita.vue
+|-- tablaMunicipalidadTest.sql
 |-- tablas municipalidad.sql
+|-- test
+|   |-- empleados.test.js
+|   `-- setupGlobal.js
 `-- vite.config.js
 
-18 directories, 88 files
+22 directories, 79 files
