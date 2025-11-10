@@ -1,53 +1,55 @@
 /**
- * 🧾 Logger institucional (CommonJS)
- * - Asegura existencia de carpeta logs/
- * - Escribe en logs/test.log y logs/accesos.log
- * - Compatible con entornos limpios, Mocha y CI
+ * 🧾 LOGGER INSTITUCIONAL
+ * - Registra accesos y eventos en archivos separados
+ * - Redirige a accesos.test.log si NODE_ENV === 'test'
+ * - Compatible con trazabilidad y cierre en tests
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// 📁 Ruta de logs institucionales
-const logsDir = path.resolve('./logs');
+// 📁 Asegurar carpeta de logs
+const logsDir = path.join(__dirname, '../../logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// 🧪 Stream para logs de pruebas
-const testStream = fs.createWriteStream(path.join(logsDir, 'test.log'), { flags: 'a' });
+// 🧪 Detectar entorno de test
+const isTest = process.env.NODE_ENV === 'test';
 
-// 🔐 Stream para logs de accesos
-const accesoStream = fs.createWriteStream(path.join(logsDir, 'accesos.log'), { flags: 'a' });
+// 📝 Streams configurados por entorno
+const accesoStream = fs.createWriteStream(
+  path.join(logsDir, isTest ? 'accesos.test.log' : 'accesos.log'),
+  { flags: 'a' }
+);
 
-/**
- * 🧪 Log institucional para pruebas
- * @param {string} msg - Mensaje a registrar
- */
-function logTest(msg) {
-  const timestamp = new Date().toISOString();
-  testStream.write(`[${timestamp}] ${msg}\n`);
-}
+const testStream = fs.createWriteStream(
+  path.join(logsDir, 'test.log'),
+  { flags: 'a' }
+);
 
-/**
- * 🔐 Log institucional de accesos
- * @param {string} msg - Mensaje a registrar
- * @param {string} usuario - Email o identificador del usuario
- */
-function logAcceso(msg, usuario = 'sistema') {
-  const entrada = {
+// 🧾 Log de accesos institucionales
+const logAcceso = (mensaje, usuario) => {
+  const log = {
     timestamp: new Date().toISOString(),
     usuario,
-    mensaje: msg
+    mensaje
   };
-  accesoStream.write(JSON.stringify(entrada) + '\n');
-}
+  accesoStream.write(JSON.stringify(log) + '\n');
+};
 
-// ✅ Exportación institucional
+// 🧪 Log de eventos de test
+const logTest = (mensaje) => {
+  const log = {
+    timestamp: new Date().toISOString(),
+    mensaje
+  };
+  testStream.write(JSON.stringify(log) + '\n');
+};
+
 module.exports = {
-  logTest,
   logAcceso,
-  log: logTest,
-  testStream,
-  accesoStream
+  logTest,
+  accesoStream,
+  testStream
 };

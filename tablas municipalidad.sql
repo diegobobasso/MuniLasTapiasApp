@@ -63,7 +63,7 @@ CREATE TABLE noticias (
     INDEX idx_noticias_categoria (categoria)
 );
 
--- 📋 TRÁMITES (ya existía)
+-- 📋 TRÁMITES (corregida para compatibilidad con backend)
 CREATE TABLE tramites (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(200) NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE tramites (
     categoria VARCHAR(100) NOT NULL,
     duracion_estimada VARCHAR(50),
     costo DECIMAL(10,2) DEFAULT 0.00,
-    requisitos JSON,
+    requisitos TEXT, -- ← corregido: era JSON
     horario_atencion VARCHAR(100),
     telefono_contacto VARCHAR(20),
     encargado_id INT,

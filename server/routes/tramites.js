@@ -9,6 +9,7 @@ const router = express.Router();
 const { verificarToken, autorizarRoles } = require('../middleware/authMiddleware');
 const { asyncHandler, ValidationError, NotFoundError } = require('../middleware/errorHandler');
 const { ejecutarConsulta } = require('../config/databaseConnection');
+const { logAcceso } = require('../utils/logger');
 
 // ➕ Crear trámite
 router.post('/', verificarToken, autorizarRoles('empleado'), asyncHandler(async (req, res) => {
@@ -24,14 +25,24 @@ router.post('/', verificarToken, autorizarRoles('empleado'), asyncHandler(async 
   const sql = `
     INSERT INTO tramites (
       nombre, descripcion, categoria, duracion_estimada, costo,
-      requisitos, horario_atencion, telefono_contacto, encargado_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      requisitos, horario_atencion, telefono_contacto, encargado_id, activo
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
   `;
   const params = [
-    nombre, descripcion, categoria, duracion_estimada, costo,
-    JSON.stringify(requisitos || []), horario_atencion, telefono_contacto, encargado_id
+    nombre,
+    descripcion,
+    categoria,
+    duracion_estimada,
+    costo,
+    JSON.stringify(Array.isArray(requisitos) ? requisitos : []),
+    horario_atencion,
+    telefono_contacto,
+    encargado_id ?? null
   ];
+
   const resultado = await ejecutarConsulta(sql, params);
+
+  logAcceso(`➕ Trámite creado: ${nombre}`, req.user?.email);
 
   res.status(201).json({
     success: true,
@@ -43,6 +54,9 @@ router.post('/', verificarToken, autorizarRoles('empleado'), asyncHandler(async 
 // 📋 Obtener todos los trámites
 router.get('/', verificarToken, asyncHandler(async (req, res) => {
   const tramites = await ejecutarConsulta('SELECT * FROM tramites WHERE activo = TRUE');
+
+  logAcceso('📋 Listado de trámites consultado', req.user?.email);
+
   res.json({
     success: true,
     data: { tramites },
@@ -57,6 +71,8 @@ router.get('/:id', verificarToken, asyncHandler(async (req, res) => {
 
   if (resultado.length === 0) throw new NotFoundError(`Trámite con ID ${id} no encontrado`);
 
+  logAcceso(`👤 Consulta de trámite ID ${id}`, req.user?.email);
+
   res.json({ success: true, data: { tramite: resultado[0] } });
 }));
 
@@ -69,8 +85,15 @@ router.put('/:id', verificarToken, autorizarRoles('empleado'), asyncHandler(asyn
     campos.requisitos = JSON.stringify(campos.requisitos);
   }
 
-  const resultado = await ejecutarConsulta('UPDATE tramites SET ? WHERE id = ?', [campos, id]);
+  const keys = Object.keys(campos);
+  const values = Object.values(campos);
+  const setClause = keys.map(k => `${k} = ?`).join(', ');
+  const sql = `UPDATE tramites SET ${setClause} WHERE id = ?`;
+
+  const resultado = await ejecutarConsulta(sql, [...values, id]);
   if (resultado.affectedRows === 0) throw new NotFoundError(`Trámite con ID ${id} no encontrado`);
+
+  logAcceso(`✏️ Trámite actualizado ID ${id}`, req.user?.email);
 
   res.json({
     success: true,
@@ -85,6 +108,8 @@ router.delete('/:id', verificarToken, autorizarRoles('empleado'), asyncHandler(a
   const resultado = await ejecutarConsulta('UPDATE tramites SET activo = FALSE WHERE id = ?', [id]);
 
   if (resultado.affectedRows === 0) throw new NotFoundError(`Trámite con ID ${id} no encontrado`);
+
+  logAcceso(`❌ Trámite desactivado ID ${id}`, req.user?.email);
 
   res.json({
     success: true,

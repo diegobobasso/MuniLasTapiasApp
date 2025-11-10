@@ -1,159 +1,115 @@
-# MuniLasTapiasHTML
-Prueba para la Municipalidad
+# 🏛️ Municipalidad de Las Tapias — Backend Institucional
 
-
-# 📁 Módulo Institucional de Gestión de Archivos
-
-Este módulo permite vincular, auditar y limpiar archivos PDF asociados a entidades como inspecciones, vecinos, trámites, terrenos, etc. Está diseñado para cumplir con estándares de trazabilidad, seguridad y mantenimiento institucional.
+Sistema modular, trazable y seguro para la gestión de empleados, vecinos y operaciones municipales. Compatible con auditorías, onboarding y CI.
 
 ---
 
-## 🔧 API: `/api/archivos`
+## 📁 Estructura general
 
-### 📤 Subida de archivo
+server/ 
+├── config/ 
+│ └── databaseConnection.js # Conexión MySQL y ejecución segura 
+├── middleware/ 
+│ 
+├── authMiddleware.js # Autenticación y autorización por rol 
+│ 
+├── errorHandler.js # Manejo centralizado de errores 
+│ 
+└── verificarToken.js # Middleware institucional JWT 
+├── routes/ 
+│ 
+└── empleados.js # CRUD completo de empleados 
+├── utils/ 
+│ 
+└── logger.js # Logs de acceso y pruebas test/ 
+├── empleados.test.js # Tests institucionales de empleados 
+├── setupGlobal.js # Setup global: tokens, limpieza, cierre src/ 
+├── pages/AdminEmpleados.vue # Frontend de gestión de empleados 
+├── helpers/api.js # Cliente Axios con token institucional
 
-- **Método:** `POST`
-- **Autenticación:** Requiere token JWT
-- **Formato:** `multipart/form-data`
-- **Campos requeridos:**
-  - `entidad_origen`: string (`inspeccion`, `vecino`, `tramite`, etc.)
-  - `origen_id`: número (ID del registro origen)
-  - `archivo`: archivo PDF
-
-### 🧠 Validaciones
-
-- Se rechazan archivos duplicados por `nombre_archivo`, `entidad_origen` y `origen_id`
-- Se permite subir múltiples archivos por entidad sin reemplazo automático
-- Se registra `fecha_subida` y `tipo_mime` para auditoría
-
-### 🗑️ Eliminación
-
-- **Método:** `DELETE /api/archivos/:id`
-- Elimina el archivo físico y su registro en la base de datos
-- Registra la eliminación en la tabla `archivos_eliminados` con motivo `manual`
-
-### 📄 Listado
-
-- **Método:** `GET /api/archivos`
-- Devuelve todos los archivos ordenados por fecha
+Código
 
 ---
 
-## 🧩 Composable: `useArchivoUploader.js`
+## 🔐 Autenticación y autorización
 
-Ubicado en `src/composables/`, permite subir archivos desde cualquier componente Vue.
-
-```js
-export async function subirArchivo(entidad, origenId, archivo) {
-  const formData = new FormData();
-  formData.append('entidad_origen', entidad);
-  formData.append('origen_id', origenId);
-  formData.append('archivo', archivo);
-
-  const res = await fetch('/api/archivos', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    },
-    body: formData
-  });
-
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Error al subir archivo');
-  return data;
-}
-```
-
-### Ejemplo de uso:
-
-```js
-import { subirArchivo } from '@/composables/useArchivoUploader.js';
-
-const resultado = await subirArchivo('inspeccion', 12, archivoSeleccionado);
-```
+- JWT firmado con `JWT_SECRET`
+- Middleware `verificarToken`:
+  - Permite `/admin/bootstrap` sin token
+  - Valida formato `Bearer <token>`
+  - Asigna `req.empleado` y `req.user`
+- Middleware `autorizarRoles(...roles)`:
+  - Protege rutas según rol (`admin`, `empleado`, `vecino`)
 
 ---
 
-## 🧱 Componente: `archivoEntidad.vue`
+## 🧾 Logger institucional
 
-Componente reutilizable para vincular archivos a cualquier entidad. Recibe `entidad` e `origenId` como props y permite:
-
-- Mostrar todos los archivos vinculados
-- Subir nuevos archivos sin reemplazar
-- Eliminar archivos individualmente
-
-Se usa en vistas como `gestionInspecciones.vue`, `gestionVecinos.vue`, etc.
+- `logAcceso(mensaje, usuario)` → guarda en `logs/accesos.log`
+- `logTest(mensaje)` → guarda en `logs/test.log`
+- Compatible con Mocha y CI
+- Cierre automático en `after()` de tests
 
 ---
 
-## 🧾 Vista: `gestionArchivos.vue`
+## 🧪 Tests institucionales
 
-Vista institucional para auditar todos los archivos del sistema. Incluye:
-
-- Filtros por entidad y fecha
-- Tabla con nombre, ruta, fecha y estado
-- Detección de archivos huérfanos (sin entidad válida)
-- Detección de duplicados (mismo nombre por entidad e ID)
-- Eliminación manual por ID
-
----
-
-## 🧼 Limpieza institucional: `scripts/limpiarArchivos.js`
-
-Script ejecutable que elimina archivos innecesarios.
-
-### Funciones incluidas:
-
-- `limpiarHuerfanos()` → elimina archivos cuyo `origen_id` ya no existe en su tabla
-- `limpiarDuplicados()` → elimina archivos con mismo `nombre_archivo`, `entidad_origen` y `origen_id`, conservando el más antiguo
-
-### Trazabilidad:
-
-- Registra cada eliminación en:
-  - Archivo físico: `logs/limpieza.log`
-  - Tabla: `archivos_eliminados`
-- Motivos registrados: `huérfano`, `duplicado`
-
-### Ejecución manual:
-
-```bash
-node scripts/limpiarArchivos.js
-```
-
-> ⚠️ No se expone vía API. Solo personal técnico autorizado puede ejecutarlo.
+- `setupGlobal.js`:
+  - Carga `.env` o `.env.test`
+  - Genera tokens (`admin`, `empleado`, `vecino`)
+  - Limpia tablas antes de test
+  - Cierra `logger` y `pool MySQL` al final
+- `empleados.test.js`:
+  - Crear, listar, actualizar, restaurar clave, eliminar
+  - Valida trazabilidad con `expectLogMatch(...)`
 
 ---
 
-## 🧾 Trazabilidad de eliminaciones
+## 🧩 Base de datos
 
-Todas las eliminaciones de archivos se registran en la tabla `archivos_eliminados`, incluyendo:
-
-- Eliminaciones por limpieza (`huérfano`, `duplicado`)
-- Eliminaciones manuales desde el panel admin (`manual`)
-
-Campos registrados:
-
-- `archivo_id`, `entidad_origen`, `origen_id`
-- `nombre_archivo`, `ruta_archivo`
-- `motivo`, `fecha_eliminacion`
+- MySQL con esquema `municipalidad_test`
+- Tablas cubiertas:
+  - `empleados`, `vecinos`, `sugerencias`, `noticias`, `tramites`, `negocios`, `terrenos`, `eventos`, `denuncias`, `inspecciones`, `archivos`, `conexiones`, `consultas_servicios`, `articulos`, `logs_acceso`
+- Todas las consultas usan `ejecutarConsulta(sql, params)` desde `databaseConnection.js`
 
 ---
 
-## 📁 Estructura de carpetas requerida
+## 👨‍💼 Rutas de empleados (`/api/empleados`)
 
-- `public/uploads/` → carpeta raíz para archivos subidos
-  - Subcarpetas por entidad se crean automáticamente (`inspeccion`, `vecino`, etc.)
-- `logs/` → carpeta para registrar limpieza (`limpieza.log`)
-
-```bash
-mkdir -p public/uploads
-mkdir logs
-```
+| Método | Ruta                         | Descripción                          | Protegido por |
+|--------|------------------------------|--------------------------------------|----------------|
+| GET    | `/`                          | Listar empleados activos             | admin          |
+| GET    | `/:id`                       | Obtener empleado por ID              | admin          |
+| POST   | `/`                          | Crear nuevo empleado                 | admin          |
+| PUT    | `/:id`                       | Actualizar campos                    | admin          |
+| PUT    | `/:id/restaurar-clave`       | Restaurar contraseña                 | admin          |
+| DELETE | `/:id`                       | Desactivar (soft delete)             | admin          |
 
 ---
 
-## 🛡️ Seguridad institucional
+## 🖥️ Frontend: `AdminEmpleados.vue`
 
-- Todas las rutas están protegidas con `verificarToken`
-- La limpieza no está expuesta por API
-- El sistema está preparado para auditoría externa y mantenimiento técnico
+- Página de gestión de empleados
+- Usa `getToken('admin')` para autenticación
+- Consume rutas protegidas con Axios (`api.js`)
+- Muestra lista, formulario de alta, edición y restauración de clave
+
+---
+
+## ✅ Seguridad y trazabilidad
+
+- Todas las rutas protegidas por token y rol
+- Logs de acceso en `logs/accesos.log`
+- Errores capturados y devueltos con estructura clara
+- Tests validan efectos en base y trazabilidad
+
+---
+
+## 🧩 Recomendaciones
+
+- Usar `verificarToken` en producción
+- Validar trazabilidad con `expectLogMatch(...)`
+- Mantener `.env.test` separado para CI
+- Agregar `vecinos.test.js` para cobertura completa
+
+---
